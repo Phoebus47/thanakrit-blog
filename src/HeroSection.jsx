@@ -17,7 +17,7 @@ function HeroSection() {
           </p>
         </div>
         <img
-          src="/src/assets/person-with-cat.jpg"
+          src="https://res.cloudinary.com/dcbpjtd1r/image/upload/v1728449784/my-blog-post/xgfy0xnvyemkklcqodkg.jpg"
           alt="Person with a cat"
           className="h-[400px] object-cover rounded-lg shadow-lg mb-8"
         />
@@ -50,7 +50,7 @@ function HeroSection() {
           </p>
         </div>
         <img
-          src="/src/assets/person-with-cat.jpg"
+          src="https://res.cloudinary.com/dcbpjtd1r/image/upload/v1728449784/my-blog-post/xgfy0xnvyemkklcqodkg.jpg"
           alt="Person with a cat"
           className="h-[530px] object-cover rounded-lg shadow-lg w-1/3 mx-4"
         />
