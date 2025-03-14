@@ -8,11 +8,12 @@ const Navbar = () => {
   };
 
   return (
-    <div className="w-full border-b border-gray-200">
+    <div className="w-full border-b border-gray-200 font-NewsCycle">
       {/* Desktop Navbar */}
       <nav className="max-w-10/12 mx-auto flex justify-between items-center p-6">
-        <div className="text-3xl font-semibold text-gray-800">
-          hh<span className="text-green-500">.</span>
+        <div className="text-2xl font-semibold text-gray-800 text-right">
+          Thanakrit <br /> Thanyawatsakul
+          <span className="text-green-500">.</span>
         </div>
 
         {/* Hamburger Menu Button (visible on mobile) */}

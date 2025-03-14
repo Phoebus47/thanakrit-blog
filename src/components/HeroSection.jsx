@@ -23,7 +23,7 @@ function HeroSection() {
         />
         <div>
           <h2 className="text-l font-light mb-2">-Author</h2>
-          <h3 className="text-2xl font-semibold mb-4">Thompson P.</h3>
+          <h3 className="text-2xl font-semibold mb-4">Thanakrit T.</h3>
           <p className="text-gray-500 mb-4">
             I am a pet enthusiast and freelance writer who specializes in animal
             behavior and care. With a deep love for cats, I enjoy sharing
@@ -56,7 +56,7 @@ function HeroSection() {
         />
         <div className="w-1/3 pl-8">
           <h2 className="text-l font-light mb-2">-Author</h2>
-          <h3 className="text-2xl font-semibold mb-4">Thompson P.</h3>
+          <h3 className="text-2xl font-semibold mb-4">Thanakrit T.</h3>
           <p className="text-gray-500 mb-4">
             I am a pet enthusiast and freelance writer who specializes in animal
             behavior and care. With a deep love for cats, I enjoy sharing
