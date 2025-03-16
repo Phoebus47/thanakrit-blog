@@ -5,9 +5,11 @@ import Footer from "./components/Footer";
 function App() {
   return (
     <>
-      <Navbar />
-      <HeroSection />
-      <Footer />
+      <div className="font-orbitron bg-[url(https://imgur.com/0XHwX1g.jpg)] bg-cover md:bg-contain sm:bg-cover bg-center text-white">
+        <Navbar />
+        <HeroSection />
+        <Footer />
+      </div>
     </>
   );
 }
