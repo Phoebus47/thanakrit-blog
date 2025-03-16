@@ -1,1 +1,71 @@
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap");
 @import "tailwindcss";
+
+/* Custom styles */
+@theme {
+  --font-orbitron: "Orbitron", sans-serif;
+  --color-neon-pink: #ff00ff;
+  --color-neon-blue: #00f0ff;
+  --color-neon-green: #00ff00;
+  --color-neon-yellow: #ffff00;
+  --color-neon-orange: #ff9f00;
+  --color-neon-red: #ff0000;
+  --color-neon-purple: #9b4dff;
+  --color-neon-dark-blue: #3330e4;
+  --color-neon-white: #ffffff;
+  --color-neon-black: #000000;
+  --shadow-neon-pink: 0px 0px 10px #ff00ff;
+  --shadow-neon-blue: 0px 0px 10px #00f0ff;
+  --shadow-neon-green: 0px 0px 10px #00ff00;
+  --shadow-neon-yellow: 0px 0px 10px #ffff00;
+  --shadow-neon-orange: 0px 0px 10px #ff9f00;
+  --shadow-neon-red: 0px 0px 10px #ff0000;
+  --shadow-neon-purple: 0px 0px 10px #9b4dff;
+  --shadow-neon-dark-blue: 0px 0px 10px #3330e4;
+  --shadow-neon-white: 0px 0px 10px #ffffff;
+  --shadow-neon-black: 0px 0px 10px #000000;
+  --text-shadow-neon-pink: 1px 1px 3px #ff00ff;
+  --text-shadow-neon-blue: 1px 1px 3px #00f0ff;
+  --text-shadow-neon-green: 1px 1px 3px #00ff00;
+  --text-shadow-neon-yellow: 1px 1px 3px #ffff00;
+  --text-shadow-neon-orange: 1px 1px 3px #ff9f00;
+  --text-shadow-neon-red: 1px 1px 3px #ff0000;
+  --text-shadow-neon-purple: 1px 1px 3px #9b4dff;
+  --text-shadow-neon-dark-blue: 1px 1px 3px #3330e4;
+  --text-shadow-neon-white: 1px 1px 3px #ffffff;
+  --text-shadow-neon-black: 1px 1px 3px #000000;
+}
+
+/* Add a custom utility for text-shadow */
+@layer utilities {
+  .txt-shadow-neon-pink {
+    text-shadow: var(--text-shadow-neon-pink);
+  }
+  .txt-shadow-neon-blue {
+    text-shadow: var(--text-shadow-neon-blue);
+  }
+  .txt-shadow-neon-green {
+    text-shadow: var(--text-shadow-neon-green);
+  }
+  .txt-shadow-neon-yellow {
+    text-shadow: var(--text-shadow-neon-yellow);
+  }
+  .txt-shadow-neon-orange {
+    text-shadow: var(--text-shadow-neon-orange);
+  }
+  .txt-shadow-neon-red {
+    text-shadow: var(--text-shadow-neon-red);
+  }
+  .txt-shadow-neon-purple {
+    text-shadow: var(--text-shadow-neon-purple);
+  }
+  .txt-shadow-neon-dark-blue {
+    text-shadow: var(--text-shadow-neon-dark-blue);
+  }
+  .txt-shadow-neon-white {
+    text-shadow: var(--text-shadow-neon-white);
+  }
+  .txt-shadow-neon-black {
+    text-shadow: var(--text-shadow-neon-black);
+  }
+}
