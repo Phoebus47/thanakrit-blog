@@ -16,14 +16,18 @@ function HeroSection() {
             cyberpunk-inspired innovation.
           </p>
         </div>
-        <img
-          // src="https://res.cloudinary.com/dcbpjtd1r/image/upload/v1728449784/my-blog-post/xgfy0xnvyemkklcqodkg.jpg"
-          src="https://imgur.com/tgra0GZ.jpg"
-          alt="Person with a cat"
-          className="h-[400px] object-cover rounded-lg shadow-lg mb-8"
-        />
+        <div className="h-[400px] w-auto max-w-[400px] mb-8 flex items-center justify-center">
+  <img
+    src="https://imgur.com/2uO8uEZ.jpg"
+    alt="Thanakrit T."
+    loading="lazy"
+    className="w-full h-full object-cover rounded-lg fade-mask"
+    onLoad={(e) => e.target.style.opacity = 1}
+    style={{ opacity: 0, transition: "opacity 0.5s ease-in-out" }}
+  />
+</div>
         <div>
-          <h2 className="text-l font-light mb-2">-Author</h2>
+          <h2 className="text-white text-l font-light mb-2">-Author</h2>
           <h3 className="text-2xl font-semibold mb-4 text-neon-blue txt-shadow-neon-blue">
             Thanakrit T.
           </h3>
@@ -54,14 +58,18 @@ function HeroSection() {
             cyberpunk-inspired innovation.
           </p>
         </div>
-        <img
-          // src="https://res.cloudinary.com/dcbpjtd1r/image/upload/v1728449784/my-blog-post/xgfy0xnvyemkklcqodkg.jpg"
-          src="https://imgur.com/tgra0GZ.jpg"
-          alt="Thanakrit T."
-          className="h-[530px] object-cover rounded-lg w-1/3 mx-4"
-        />
+        <div className="h-[400px] w-[400px] max-w-[400px] mb-8 flex items-center justify-center">
+  <img
+    src="https://imgur.com/2uO8uEZ.jpg"
+    alt="Thanakrit T."
+    loading="lazy"
+    className="w-full h-full object-cover rounded-lg fade-mask"
+    onLoad={(e) => e.target.style.opacity = 1}
+    style={{ opacity: 0, transition: "opacity 0.5s ease-in-out" }}
+  />
+</div>
         <div className="w-1/3 pl-8">
-          <h2 className="text-l font-light mb-2">-Author</h2>
+          <h2 className="text-white text-l font-light mb-2">-Author</h2>
           <h3 className="text-2xl font-semibold mb-4 text-neon-blue txt-shadow-neon-blue">
             Thanakrit T.
           </h3>

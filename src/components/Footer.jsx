@@ -3,9 +3,9 @@ import { LinkedIn, GitHub, Google } from "@mui/icons-material";
 function Footer() {
   return (
     <footer className="text-neon-purple txt-shadow-neon-purple p-6">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-4 max-w-5xl mx-auto">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-4 max-w-6xl mx-auto">
         {/* Contact Section */}
-        <div className="flex flex-col md:flex-row items-center justify-center md:justify-start gap-4 border border-neon-purple inset-ring shadow-neon-purple p-6 md:p-8 rounded-lg w-full md:w-auto">
+        <div className="flex flex-col md:flex-row items-center justify-center md:justify-start gap-4 border border-neon-purple inset-ring-neon-purple shadow-neon-purple p-6 md:p-8 rounded-lg w-full md:w-auto">
           <p className="text-lg font-semibold">Get in Touch</p>
           <div className="flex gap-4">
             <a
