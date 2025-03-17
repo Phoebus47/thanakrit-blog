@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { MenuRounded } from "@mui/icons-material";
-import { pink } from "@mui/material/colors";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -22,7 +21,7 @@ const Navbar = () => {
 
         {/* Hamburger Menu Button (visible on mobile) */}
         <button
-          className="md:hidden text-neon-pink txt-shadow-neon-pink"
+          className="md:hidden text-neon-pink hover:text-gray-300 transition duration-300"
           onClick={toggleMenu}
           aria-label="Toggle menu"
         >
