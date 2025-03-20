@@ -13,7 +13,7 @@ export function BlogCard({
       </a>
       <div className="flex flex-col">
         <div className="flex">
-          <span className="bg-none border shadow-neon-blue rounded-full px-3 py-1 text-sm font-semibold inset-ring text-neon-blue txt-shadow-neon-blue mb-2">
+          <span className="bg-none border shadow-neon-blue rounded-full px-3 py-1 text-sm font-semibold inset-ring text-neon-blue txt-shadow-neon-blue hover:border-neon-blue hover:bg-neon-blue hover:text-white mb-2">
             {category}
           </span>
         </div>
