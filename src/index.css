@@ -78,6 +78,10 @@
 }
 }
 
+input::placeholder {
+  font-family: var(--placeholder-font-family);
+}
+
 :root {
   --search-bg: var(--color-neon-orange);
   --search-bg-hover: var(--txt-shadow-neon-orange);
@@ -87,6 +91,7 @@
   --shadow-neon-orange: 0px 0px 10px #ff9f00;
   --text-shadow-neon-orange: 1px 1px 3px #ff9f00;
   --font-orbitron: "Orbitron", sans-serif;
+  --placeholder-font-family: var(--font-orbitron);
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
