@@ -22,7 +22,7 @@ function App() {
         backgroundLoaded
           ? "bg-[url(https://imgur.com/UASlokn.jpg)]"
           : "bg-slate-950" // สีพื้นหลังชั่วคราวระหว่างโหลด
-      } bg-cover md:bg-contain sm:bg-cover bg-center`}
+      } bg-fixed bg-cover md:bg-contain sm:bg-cover bg-center`}
     >
       <Navbar />
       <HeroSection />

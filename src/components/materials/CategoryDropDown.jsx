@@ -8,37 +8,23 @@ import {
   NavigationMenuContent,
 } from "@radix-ui/react-navigation-menu";
 import { cn } from "@/lib/utils";
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export function CategoryDropDown() {
+  const categories = ["Highlight", "Cat", "Inspiration", "General"];
   return (
-    <div className="w-full max-w-md mt-4 text-neon-orange txt-shadow-neon-orange">
+    <div className="w-full max-w mt-4 text-neon-orange txt-shadow-neon-orange">
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
-            <NavigationMenuTrigger className="txt-shadow-neon-orange">Category <ExpandMoreIcon /></NavigationMenuTrigger>
+            <NavigationMenuTrigger className="txt-shadow-neon-orange">
+              Category <ExpandMoreIcon />
+            </NavigationMenuTrigger>
             <NavigationMenuContent>
               <ul className="grid gap-3 p-4">
-                <CategoryItem href="/highlight" title="Highlight">
-                  <p className="text-white">
-                    Featured articles, top picks, and more.
-                  </p>
-                </CategoryItem>
-                <CategoryItem href="/showcase" title="Showcase">
-                  <p className="text-white">
-                    Curated projects, portfolios, and inspiration.
-                  </p>
-                </CategoryItem>
-                <CategoryItem href="/inspiration" title="Inspiration">
-                  <p className="text-white">
-                    Creative ideas, design trends, and sources.
-                  </p>
-                </CategoryItem>
-                <CategoryItem href="/general" title="General">
-                  <p className="text-white">
-                    General articles and content updates.
-                  </p>
-                </CategoryItem>
+                {categories.map((category) => (
+                  <CategoryItem key={category} title={category} />
+                ))}
               </ul>
             </NavigationMenuContent>
           </NavigationMenuItem>
