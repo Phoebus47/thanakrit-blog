@@ -73,13 +73,32 @@
     text-shadow: var(--text-shadow-neon-black);
   }
   .fade-mask {
-    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 90%, rgba(0, 0, 0, 0.1) 100%);
-    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 90%, rgba(0, 0, 0, 0.1) 100%);
-}
+    mask-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 1) 90%,
+      rgba(0, 0, 0, 0.1) 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 1) 90%,
+      rgba(0, 0, 0, 0.1) 100%
+    );
+  }
 }
 
 input::placeholder {
   font-family: var(--placeholder-font-family);
+  font-weight: 600;
+}
+
+input {
+  font-family: var(--placeholder-font-family);
+  font-weight: 600;
+}
+
+.tabs-trigger[data-state="active"] {
+  color: white; /* เปลี่ยนเป็นสี neon-yellow */
+  background-color: var(--color-neon-orange);
 }
 
 :root {
