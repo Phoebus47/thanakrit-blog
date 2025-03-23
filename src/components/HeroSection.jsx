@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 function HeroSection() {
   const sections = [
     {
       title: "Code the \nFuture, \nShape the Web",
       description: "Explore the world of modern web development, futuristic UI, and cyberpunk-inspired innovation.",
-      image: "https://imgur.com/2uO8uEZ.jpg",
+      image: "https://i.imgur.com/2uO8uEZ.jpg",
       author: {
         name: "Thanakrit T.",
         role: "-Author",
@@ -14,6 +14,12 @@ function HeroSection() {
       },
     },
   ];
+
+  // ตั้งค่า cookies ใน useEffect
+  useEffect(() => {
+    // กำหนดค่า cookie ใน document
+    document.cookie = "yourCookie=value; path=/; domain=example.com; Secure; SameSite=None";
+  }, []);
 
   return (
     <main className="container px-4 py-8 lg:py-16 mx-auto txt-shadow-neon-green">
@@ -39,6 +45,7 @@ function HeroSection() {
               className="w-full h-full object-cover rounded-lg fade-mask"
               onLoad={(e) => e.target.style.opacity = 1}
               style={{ opacity: 0, transition: "opacity 0.5s ease-in-out" }}
+              crossOrigin="anonymous"
             />
           </div>
           <div>

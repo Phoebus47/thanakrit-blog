@@ -10,17 +10,21 @@ function App() {
   useEffect(() => {
     const loadImage = async () => {
       const img = new Image();
-      img.src = "https://imgur.com/UASlokn.jpg"; // URL ของภาพพื้นหลัง
+      img.crossOrigin = 'anonymous';
+      img.src = "https://i.imgur.com/UASlokn.jpg"; // URL ของภาพพื้นหลัง
       img.onload = () => setBackgroundLoaded(true);
     };
     loadImage();
+    
+    // ตั้งคุกกี้หลังจากโหลดภาพพื้นหลัง
+    document.cookie = "yourCookie=value; path=/; domain=example.com; Secure; SameSite=None";
   }, []);
 
   return (
     <div
       className={`font-orbitron ${
         backgroundLoaded
-          ? "bg-[url(https://imgur.com/UASlokn.jpg)]"
+          ? "bg-[url(https://i.imgur.com/UASlokn.jpg)]"
           : "bg-slate-950" // สีพื้นหลังชั่วคราวระหว่างโหลด
       } bg-fixed bg-cover md:bg-contain sm:bg-cover bg-center`}
     >
