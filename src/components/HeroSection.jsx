@@ -4,7 +4,8 @@ function HeroSection() {
   const sections = [
     {
       title: "Code the \nFuture, \nShape the Web",
-      description: "Explore the world of modern web development, futuristic UI, and cyberpunk-inspired innovation.",
+      description:
+        "Explore the world of modern web development, futuristic UI, and cyberpunk-inspired innovation.",
       image: "https://i.imgur.com/2uO8uEZ.jpg",
       author: {
         name: "Thanakrit T.",
@@ -18,7 +19,8 @@ function HeroSection() {
   // ตั้งค่า cookies ใน useEffect
   useEffect(() => {
     // กำหนดค่า cookie ใน document
-    document.cookie = "yourCookie=value; path=/; domain=example.com; Secure; SameSite=None";
+    document.cookie =
+      "yourCookie=value; path=/; domain=example.com; Secure; SameSite=None";
   }, []);
 
   return (
@@ -35,7 +37,9 @@ function HeroSection() {
                 </React.Fragment>
               ))}
             </h1>
-            <p className="text-lg text-white text-center">{section.description}</p>
+            <p className="text-lg text-white text-center">
+              {section.description}
+            </p>
           </div>
           <div className="h-[400px] w-auto max-w-[400px] mb-8 flex items-center justify-center">
             <img
@@ -43,13 +47,15 @@ function HeroSection() {
               alt={section.author.name}
               loading="lazy"
               className="w-full h-full object-cover rounded-lg fade-mask"
-              onLoad={(e) => e.target.style.opacity = 1}
+              onLoad={(e) => (e.target.style.opacity = 1)}
               style={{ opacity: 0, transition: "opacity 0.5s ease-in-out" }}
               crossOrigin="anonymous"
             />
           </div>
           <div>
-            <h2 className="text-white text-l font-light mb-2">{section.author.role}</h2>
+            <h2 className="text-white text-l font-light mb-2">
+              {section.author.role}
+            </h2>
             <h3 className="text-2xl font-semibold mb-4 text-neon-blue txt-shadow-neon-blue">
               {section.author.name}
             </h3>
@@ -71,7 +77,9 @@ function HeroSection() {
                 </React.Fragment>
               ))}
             </h1>
-            <p className="text-lg text-white text-right">{section.description}</p>
+            <p className="text-lg text-white text-right">
+              {section.description}
+            </p>
           </div>
           <div className="h-[400px] w-[400px] max-w-[400px] mb-8 flex items-center justify-center">
             <img
@@ -79,12 +87,14 @@ function HeroSection() {
               alt={section.author.name}
               loading="lazy"
               className="w-full h-full object-cover rounded-lg fade-mask"
-              onLoad={(e) => e.target.style.opacity = 1}
+              onLoad={(e) => (e.target.style.opacity = 1)}
               style={{ opacity: 0, transition: "opacity 0.5s ease-in-out" }}
             />
           </div>
           <div className="w-1/3 pl-8">
-            <h2 className="text-white text-l font-light mb-2">{section.author.role}</h2>
+            <h2 className="text-white text-l font-light mb-2">
+              {section.author.role}
+            </h2>
             <h3 className="text-2xl font-semibold mb-4 text-neon-blue txt-shadow-neon-blue">
               {section.author.name}
             </h3>
