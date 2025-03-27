@@ -5,7 +5,7 @@ function ArticleSection() {
   return (
     <main className="max-w-10/12 mx-auto bg-slate-950/70 border border-neon-orange inset-ring shadow-neon-orange p-6 md:p-8 rounded-lg w-full">
       <h1 className="text-3xl font-semibold text-neon-yellow txt-shadow-neon-orange text-left mb-4">
-        Explore the Latest Articles
+        Latest Articles
       </h1>
 
       {/* Mobile Layout */}
