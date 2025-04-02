@@ -5,10 +5,10 @@ import axios from "axios";
 import ReactMarkdown from "react-markdown";
 
 function ViewPostPage() {
-  const { postId } = useParams();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [backgroundLoaded, setBackgroundLoaded] = useState(false);
+  const { postId } = useParams();
 
   useEffect(() => {
     const img = new Image();
@@ -22,6 +22,11 @@ function ViewPostPage() {
   }, []);
 
   useEffect(() => {
+    if (!postId) {
+      console.error("Post ID is missing from the URL");
+      return;
+    }
+
     axios
       .get(`https://blog-post-project-api.vercel.app/posts/${postId}`)
       .then((response) => {
@@ -34,7 +39,7 @@ function ViewPostPage() {
         setLoading(false);
       });
   }, [postId]);
-  
+
   return (
     <>
       <div

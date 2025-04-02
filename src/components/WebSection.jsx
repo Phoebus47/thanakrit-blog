@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MenuRounded, LinkedIn, GitHub, Google } from "@mui/icons-material";
-
+import { Link } from "react-router-dom";
 
 //Navbar
 export const Navbar = () => {
@@ -116,7 +116,6 @@ export function HeroSection() {
         </div>
       ))}
 
-
       {/* Desktop Layout */}
       {sections.map((section, index) => (
         <div className={`hidden lg:flex lg:flex-row items-center`} key={index}>
@@ -159,7 +158,6 @@ export function HeroSection() {
   );
 }
 
-
 //Footer
 export const Footer = () => {
   return (
@@ -168,22 +166,33 @@ export const Footer = () => {
         <div className="flex flex-col md:flex-row items-center justify-center md:justify-start gap-4 border border-neon-purple inset-ring-neon-purple shadow-neon-purple p-6 md:p-8 rounded-lg w-11/12 md:w-auto">
           <p className="text-lg font-semibold">Get in Touch</p>
           <div className="flex gap-4">
-            <a href="https://www.linkedin.com/in/thanakrit-thanyawatsakul/" className="hover:text-gray-300 transition">
+            <a
+              href="https://www.linkedin.com/in/thanakrit-thanyawatsakul/"
+              className="hover:text-gray-300 transition"
+            >
               <LinkedIn fontSize="large" />
             </a>
-            <a href="https://github.com/Phoebus47" className="hover:text-gray-300 transition">
+            <a
+              href="https://github.com/Phoebus47"
+              className="hover:text-gray-300 transition"
+            >
               <GitHub fontSize="large" />
             </a>
-            <a href="mailto:thanakrit.than.biz@gmail.com" className="hover:text-gray-300 transition">
+            <a
+              href="mailto:thanakrit.than.biz@gmail.com"
+              className="hover:text-gray-300 transition"
+            >
               <Google fontSize="large" />
             </a>
           </div>
         </div>
         <div className="flex flex-col items-center justify-center">
-          <a href="https://thanakrit-blog.vercel.app/" className="underline hover:text-gray-300 transition">
+          <Link to="/" className="underline hover:text-gray-300 transition">
             Home Page
-          </a>
-          <p className="text-center text-gray-500 text-sm pt-2">© 2025 Thanakrit. All rights reserved.</p>
+          </Link>
+          <p className="text-center text-gray-500 text-sm pt-2">
+            © 2025 Thanakrit. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
