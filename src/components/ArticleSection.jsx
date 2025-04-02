@@ -1,580 +1,11 @@
-// import { StyledTabs } from "./materials/Tabs";
-// import { CategoryDropDown } from "./materials/CategoryDropDown";
-
-// function ArticleSection() {
-//   return (
-//     <main className="max-w-10/12 mx-auto bg-slate-950/70 border border-neon-orange inset-ring shadow-neon-orange p-6 md:p-8 rounded-lg w-full">
-//       <h1 className="text-3xl font-semibold text-neon-yellow txt-shadow-neon-orange text-left mb-4">
-//         Latest Articles
-//       </h1>
-
-//       {/* Mobile Layout */}
-//       <div className="md:hidden flex flex-col items-center w-full space-y-4">
-//         <CategoryDropDown />
-//       </div>
-
-//       {/* Desktop Layout */}
-//       <div className="hidden md:flex md:flex-col md:gap-6">
-//         <div className="flex justify-between items-center">
-//           <StyledTabs />
-//         </div>
-//       </div>
-//     </main>
-//   );
-// }
-
-// export default ArticleSection;
-
-// import { Input } from "@/components/ui/input";
-// import { useNavigate, Link } from "react-router-dom";
-// import axios from "axios";
-// import { useState, useEffect, useCallback } from "react";
-// import SearchIcon from "@mui/icons-material/Search";
-// import {
-//   NavigationMenu,
-//   NavigationMenuList,
-//   NavigationMenuItem,
-//   NavigationMenuTrigger,
-//   NavigationMenuContent,
-// } from "@radix-ui/react-navigation-menu";
-// import { cn } from "@/lib/utils";
-// import { BlogCard } from "./BlogCard";
-// import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-// import { AnotherSearchBar } from "./Searchbar";
-// import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-// import { SearchBar } from "./Searchbar";
-
-// // StyledTabs
-// export function StyledTabs() {
-//   const categories = ["Highlight", "Cat", "Inspiration", "General"];
-//   const [category, setCategory] = useState("Highlight");
-//   const [posts, setPosts] = useState([]);
-//   const [page, setPage] = useState(1);
-//   const [hasMore, setHasMore] = useState(true);
-//   const [isLoading, setIsLoading] = useState(false);
-//   const [error, setError] = useState(null);
-
-//   // ✅ รีเซ็ต state เมื่อเปลี่ยนหมวดหมู่
-//   useEffect(() => {
-//     setPage(1);
-//     setHasMore(true);
-//     setPosts([]);
-//   }, [category]);
-
-//   // ✅ ฟังก์ชันดึงข้อมูลโพสต์จาก API
-//   const fetchPosts = useCallback(async () => {
-//     setIsLoading(true);
-//     setError(null);
-
-//     try {
-//       const categoryParam = category === "Highlight" ? "" : category;
-//       const response = await axios.get(
-//         "https://blog-post-project-api.vercel.app/posts",
-//         {
-//           params: {
-//             page: page,
-//             limit: 6,
-//             category: categoryParam,
-//           },
-//         }
-//       );
-
-//       setPosts((prevPosts) =>
-//         page === 1
-//           ? response.data.posts
-//           : [...prevPosts, ...response.data.posts]
-//       );
-//       setHasMore(response.data.currentPage < response.data.totalPages);
-//     } catch (error) {
-//       console.error("Error fetching posts:", error);
-//       setError("Something went wrong. Please try again.");
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   }, [category, page]);
-
-//   // ✅ ดึงโพสต์เมื่อ `page` หรือ `category` เปลี่ยน
-//   useEffect(() => {
-//     fetchPosts();
-//   }, [fetchPosts]);
-
-//   const handleLoadMore = () => {
-//     if (!isLoading && hasMore) {
-//       setPage((prevPage) => prevPage + 1);
-//     }
-//   };
-
-//   return (
-//     <div className="w-full mt-4 text-neon-orange txt-shadow-neon-orange">
-//       <Tabs value={category} onValueChange={setCategory} className="w-full">
-//         {/* Header ของ Tabs */}
-//         <div className="flex justify-between items-center bg-slate-900/80 border border-neon-orange rounded-lg px-4 py-3 shadow-neon-orange gap-10">
-//           <TabsList className="w-full bg-transparent border-b border-neon-orange flex">
-//             {categories.map((cat) => (
-//               <TabsTrigger
-//                 key={cat}
-//                 value={cat}
-//                 className={cn(
-//                   "tabs-trigger text-neon-orange txt-shadow-neon-orange hover:text-neon-yellow hover:bg-neon-orange/50",
-//                   category === cat &&
-//                     "cursor-not-allowed bg-neon-orange text-white"
-//                 )}
-//               >
-//                 {cat}
-//               </TabsTrigger>
-//             ))}
-//           </TabsList>
-//           <SearchBar />
-//         </div>
-
-//         {/* รายการโพสต์ */}
-//         <TabsContent value={category}>
-//           <h2 className="text-lg font-bold mt-4">{`Blogs in ${category}`}</h2>
-
-//           {isLoading && posts.length === 0 ? (
-//             <p className="text-gray-500 mt-4">Loading...</p>
-//           ) : error ? (
-//             <p className="text-red-500 mt-4">Something went wrong. Please try again.</p>
-//           ) : posts.length > 0 ? (
-//             <>
-//               <div className="grid grid-cols-2 gap-8 mt-4">
-//                 {posts.map((blog) => (
-//                   <BlogCard
-//                     key={blog.id}
-//                     postId={blog.id}
-//                     title={blog.title}
-//                     image={blog.image}
-//                     category={blog.category}
-//                     description={blog.description}
-//                     author={blog.author}
-//                     date={new Date(blog.date).toLocaleDateString("en-GB", {
-//                       day: "numeric",
-//                       month: "long",
-//                       year: "numeric",
-//                     })}
-//                   />
-//                 ))}
-//               </div>
-
-//               {hasMore && (
-//                 <div className="text-center mt-8">
-//                   <button
-//                     className="text-neon-orange txt-shadow-neon-orange border border-neon-orange rounded-lg px-4 py-2 hover:text-neon-yellow hover:bg-neon-orange/50 active:bg-neon-orange"
-//                     onClick={handleLoadMore}
-//                     disabled={isLoading}
-//                   >
-//                     {isLoading ? "Loading..." : "View More"}
-//                   </button>
-//                 </div>
-//               )}
-//             </>
-//           ) : (
-//             <p className="text-gray-500 mt-4">
-//               No posts found in this category.
-//             </p>
-//           )}
-//         </TabsContent>
-//       </Tabs>
-//     </div>
-//   );
-// }
-
-// // CategoryDropDown
-// export function CategoryDropDown() {
-//   const categories = ["Highlight", "Cat", "Inspiration", "General"];
-//   const [category, setCategory] = useState("Highlight");
-//   const [posts, setPosts] = useState([]);
-//   const [page, setPage] = useState(1);
-//   const [hasMore, setHasMore] = useState(true);
-//   const [isLoading, setIsLoading] = useState(false);
-//   const [error, setError] = useState(null);
-
-//   // รีเซ็ตค่าเมื่อเปลี่ยน category
-//   useEffect(() => {
-//     setPage(1);
-//     setHasMore(true);
-//     setPosts([]); // ล้างโพสต์เก่าก่อนโหลดใหม่
-//   }, [category]);
-
-//   // โหลดโพสต์
-//   const fetchPosts = useCallback(async () => {
-//     setIsLoading(true);
-
-//     try {
-//       const categoryParam = category === "Highlight" ? "" : category;
-//       const response = await axios.get(
-//         "https://blog-post-project-api.vercel.app/posts",
-//         {
-//           params: { page: page, limit: 6, category: categoryParam },
-//         }
-//       );
-
-//       setPosts((prevPosts) =>
-//         page === 1
-//           ? response.data.posts
-//           : [...prevPosts, ...response.data.posts]
-//       );
-//       setHasMore(response.data.currentPage < response.data.totalPages);
-//     } catch (error) {
-//       console.error("Error fetching posts:", error);
-//       setError("Something went wrong. Please try again.");
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   }, [category, page]);
-
-//   // โหลดข้อมูลใหม่เมื่อ page หรือ category เปลี่ยน
-//   useEffect(() => {
-//     fetchPosts();
-//   }, [fetchPosts]);
-
-//   const handleLoadMore = () => {
-//     if (!isLoading && hasMore) {
-//       setPage((prevPage) => prevPage + 1);
-//     }
-//   };
-
-//   return (
-//     <div className="w-full mt-4 text-neon-orange txt-shadow-neon-orange">
-//       <AnotherSearchBar />
-
-//       {/* Navigation Menu */}
-//       <NavigationMenu>
-//         <NavigationMenuList>
-//           <NavigationMenuItem>
-//             <NavigationMenuTrigger className="w-full flex justify-between items-center px-3 py-2 font-bold txt-shadow-neon-orange">
-//               <span>{category}</span>
-//               <ExpandMoreIcon />
-//             </NavigationMenuTrigger>
-
-//             {/* รายการ Category */}
-//             <NavigationMenuContent>
-//               <ul className="grid gap-3 p-4">
-//                 {categories.map((cat) => (
-//                   <li key={cat}>
-//                     <button
-//                       onClick={() => setCategory(cat)}
-//                       value={cat}
-//                       className={cn(
-//                         "block w-full text-left rounded-md p-3 text-sm font-medium transition-colors txt-shadow-neon-orange",
-//                         category === cat
-//                           ? "bg-neon-orange text-white cursor-not-allowed"
-//                           : "hover:bg-neon-orange/50 hover:text-neon-yellow"
-//                       )}
-//                       disabled={category === cat}
-//                     >
-//                       {cat}
-//                     </button>
-//                   </li>
-//                 ))}
-//               </ul>
-//             </NavigationMenuContent>
-//           </NavigationMenuItem>
-//         </NavigationMenuList>
-//       </NavigationMenu>
-
-//       {/* รายการ Blog ที่กรองแล้ว */}
-//       <h2 className="text-lg font-bold mt-4">{`Blogs in ${category}`}</h2>
-
-//       {isLoading && posts.length === 0 ? (
-//         <p className="text-gray-500 mt-4">Loading...</p>
-//       ) : error ? (
-//         <p className="text-red-500 mt-4">Something went wrong. Please try again.</p>
-//       ) : posts.length > 0 ? (
-//         <>
-//           <ul className="grid grid-cols-1 gap-4 mt-4">
-//             {posts.map((blog) => (
-//               <li key={blog.id}>
-//                 <BlogCard
-//                   postId={blog.id}
-//                   title={blog.title}
-//                   image={blog.image}
-//                   category={blog.category}
-//                   description={blog.description}
-//                   author={blog.author}
-//                   date={new Date(blog.date).toLocaleDateString("en-GB", {
-//                     day: "numeric",
-//                     month: "long",
-//                     year: "numeric",
-//                   })}
-//                 />
-//               </li>
-//             ))}
-//           </ul>
-
-//           {hasMore && (
-//             <div className="text-center mt-8">
-//               <button
-//                 onClick={handleLoadMore}
-//                 className="text-neon-orange txt-shadow-neon-orange border border-neon-orange rounded-lg px-4 py-2 hover:text-neon-yellow hover:bg-neon-orange/50 active:bg-neon-orange"
-//                 disabled={isLoading}
-//               >
-//                 {isLoading ? "Loading..." : "View More"}
-//               </button>
-//             </div>
-//           )}
-//         </>
-//       ) : (
-//         <p className="text-gray-500 mt-4">No posts found in this category.</p>
-//       )}
-//     </div>
-//   );
-// }
-
-// // SearchBar with debounce and search functionality
-// export function SearchBar() {
-//   const [searchKeyword, setSearchKeyword] = useState("");
-//   const [suggestions, setSuggestions] = useState([]);
-//   const [showDropdown, setShowDropdown] = useState(false);
-//   const [isLoading, setIsLoading] = useState(false);
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     if (searchKeyword.length > 0) {
-//       setIsLoading(true);
-//       const fetchSuggestions = async () => {
-//         try {
-//           const response = await axios.get(
-//             `https://blog-post-project-api.vercel.app/posts?search=${searchKeyword}`
-//           );
-//           setSuggestions(response.data.posts);
-//           setIsLoading(false);
-//         } catch (error) {
-//           console.error("Error fetching suggestions:", error);
-//           setIsLoading(false);
-//         }
-//       };
-//       fetchSuggestions();
-//     } else {
-//       setSuggestions([]);
-//     }
-//   }, [searchKeyword]);
-
-//   const handleSearch = (e) => {
-//     e.preventDefault();
-//     setSearchKeyword(e.target.value);
-//   };
-
-//   return (
-//     <div className="relative rounded-lg bg-orange-200 hover:bg-orange-100 border border-neon-orange shadow-neon-orange w-full flex items-center">
-//       <Input
-//         className="text-orange-500 placeholder-orange-400 pl-4 pr-12 py-2 w-full bg-transparent focus:outline-none rounded-lg font-orbitron"
-//         placeholder="Search…"
-//         aria-label="search"
-//         id="search-input-1"
-//         name="search"
-//         value={searchKeyword}
-//         onChange={handleSearch}
-//         onKeyDown={(e) => {
-//           if (e.key === "Enter") {
-//             navigate(`/post/${searchKeyword}`);
-//           }
-//         }}
-//         onFocus={() => setShowDropdown(true)}
-//         onBlur={() => {
-//           setTimeout(() => {
-//             setShowDropdown(false);
-//           }, 200);
-//         }}
-//       />
-//       {!isLoading && showDropdown && suggestions.length > 0 && (
-//         <div className="absolute top-full left-0 right-0 mt-2 rounded-lg bg-orange-200 shadow-neon-orange z-10">
-//           {suggestions.map((suggestion) => (
-//             <button
-//               key={suggestion._id}
-//               className="p-2 hover:bg-orange-300 cursor-pointer"
-//               onClick={() => {
-//                 navigate(`/post/${suggestion._id}`);
-//                 setShowDropdown(false);
-//               }}
-//             >
-//               {suggestion.title}
-//             </button>
-//           ))}
-//         </div>
-//       )}
-//       <button
-//         className="absolute right-2 top-1/2 -translate-y-1/2 text-orange-500 hover:text-neon-orange"
-//         onClick={() => navigate(`/post/create`)}
-//       >
-//         <SearchIcon />
-//       </button>
-//     </div>
-//   );
-// }
-
-// // AnotherSearchBar with callback for external search handling
-// export function AnotherSearchBar() {
-//   const [searchKeyword, setSearchKeyword] = useState("");
-//   const [suggestions, setSuggestions] = useState([]);
-//   const [showDropdown, setShowDropdown] = useState(false);
-//   const [isLoading, setIsLoading] = useState(false);
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     if (searchKeyword.length > 0) {
-//       setIsLoading(true);
-//       const fetchSuggestions = async () => {
-//         try {
-//           const response = await axios.get(
-//             `https://blog-post-project-api.vercel.app/posts?search=${searchKeyword}`
-//           );
-//           setSuggestions(response.data.posts);
-//           setIsLoading(false);
-//         } catch (error) {
-//           console.error("Error fetching suggestions:", error);
-//           setIsLoading(false);
-//         }
-//       };
-//       fetchSuggestions();
-//     } else {
-//       setSuggestions([]);
-//     }
-//   }, [searchKeyword]);
-
-//   const handleSearch = (e) => {
-//     e.preventDefault();
-//     setSearchKeyword(e.target.value);
-//   };
-
-//   return (
-//     <div className="relative rounded-lg bg-orange-200 hover:bg-orange-300 border border-neon-orange shadow-neon-orange w-full flex items-center">
-//       <Input
-//         className="text-orange-500 placeholder-orange-400 pl-4 pr-12 py-2 w-full bg-transparent focus:outline-none rounded-lg font-orbitron"
-//         placeholder="Search…"
-//         aria-label="search"
-//         id="search-input-2"
-//         name="search"
-//         value={searchKeyword}
-//         onChange={handleSearch}
-//         onKeyDown={(e) => {
-//           if (e.key === "Enter") {
-//             navigate(`/post/${searchKeyword}`);
-//           }
-//         }}
-//         onFocus={() => setShowDropdown(true)}
-//         onBlur={() => {
-//           setTimeout(() => {
-//             setShowDropdown(false);
-//           }, 200);
-//         }}
-//       />
-//       {!isLoading && showDropdown && suggestions.length > 0 && (
-//         <div className="absolute top-full left-0 right-0 mt-2 rounded-lg bg-orange-200 shadow-neon-orange z-10">
-//           {suggestions.map((suggestion) => (
-//             <button
-//               key={suggestion._id}
-//               className="p-2 hover:bg-orange-300 cursor-pointer"
-//               onClick={() => {
-//                 navigate(`/post/${suggestion._id}`);
-//                 setShowDropdown(false);
-//               }}
-//             >
-//               {suggestion.title}
-//             </button>
-//           ))}
-//         </div>
-//       )}
-//       <button
-//         className="absolute right-2 top-1/2 -translate-y-1/2 text-orange-500 hover:text-neon-orange"
-//         onClick={() => navigate(`/post/create`)}
-//       >
-//         <SearchIcon />
-//       </button>
-//     </div>
-//   );
-// }
-
-// // BlogCard
-// export function BlogCard({
-//   postId, // รับค่า postId
-//   image,
-//   category,
-//   title,
-//   description,
-//   author,
-//   date,
-// }) {
-//   return (
-//     <div className="flex flex-col gap-4">
-//       {/* Dynamic Link */}
-//       <Link to={`/post/${postId}`} className="relative h-[212px] sm:h-[360px]">
-//         <img
-//           className="w-full h-full object-cover rounded-md"
-//           src={image || "https://via.placeholder.com/300"}
-//           alt={title}
-//         />
-//       </Link>
-//       <div className="flex flex-col">
-//         <div className="flex">
-//           <span className="bg-none border shadow-neon-blue rounded-full px-3 py-1 text-sm font-semibold inset-ring text-neon-blue txt-shadow-neon-blue hover:border-neon-blue hover:bg-neon-blue hover:text-white mb-2">
-//             {category || "Uncategorized"}
-//           </span>
-//         </div>
-//         <Link to={`/post/${postId}`}>
-//           <h2 className="text-start font-bold text-xl mb-2 line-clamp-2 hover:underline">
-//             {title || "Untitled"}
-//           </h2>
-//         </Link>
-//         <p className="text-white txt-shadow-neon-yellow text-sm mb-4 flex-grow line-clamp-3">
-//           {description || "No description available."}
-//         </p>
-//         <div className="flex items-center text-sm">
-//           <img
-//             className="w-8 h-8 rounded-full mr-2"
-//             src="https://res.cloudinary.com/dcbpjtd1r/image/upload/v1728449784/my-blog-post/xgfy0xnvyemkklcqodkg.jpg"
-//             alt={author || "Unknown"}
-//           />
-//           <span>{author || "Unknown Author"}</span>
-//           <span className="mx-2 text-white">|</span>
-//           <span>{date || "Unknown Date"}</span>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// // ArticleSection
-// function ArticleSection() {
-//   return (
-//     <main className="max-w-10/12 mx-auto bg-slate-950/70 border border-neon-orange inset-ring shadow-neon-orange p-6 md:p-8 rounded-lg w-full">
-//       <h1 className="text-3xl font-semibold text-neon-yellow txt-shadow-neon-orange text-left mb-4">
-//         Latest Articles
-//       </h1>
-
-//       {/* Mobile Layout */}
-//       <div className="md:hidden flex flex-col items-center w-full space-y-4">
-//         <CategoryDropDown />
-//       </div>
-
-//       {/* Desktop Layout */}
-//       <div className="hidden md:flex md:flex-col md:gap-6">
-//         <div className="flex justify-between items-center">
-//           <StyledTabs />
-//         </div>
-//       </div>
-//     </main>
-//   );
-// }
-
-// export default ArticleSection;
-
 import { Input } from "@/components/ui/input";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import SearchIcon from "@mui/icons-material/Search";
-import {
-  NavigationMenu,
-  NavigationMenuList,
-  NavigationMenuItem,
-  NavigationMenuTrigger,
-  NavigationMenuContent,
-} from "@radix-ui/react-navigation-menu";
-import { cn } from "@/lib/utils";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useFetchPosts } from "@/hooks/useFetchPosts";
+import { CategorySelector } from "./CategorySelector";
+import { debounce } from "lodash";
 
 // StyledTabs
 export function StyledTabs() {
@@ -599,77 +30,62 @@ export function StyledTabs() {
 
   return (
     <div className="w-full mt-4 text-neon-orange txt-shadow-neon-orange">
-      <Tabs value={category} onValueChange={setCategory} className="w-full">
-        {/* Header ของ Tabs */}
-        <div className="flex justify-between items-center bg-slate-900/80 border border-neon-orange rounded-lg px-4 py-3 shadow-neon-orange gap-10">
-          <TabsList className="w-full bg-transparent border-b border-neon-orange flex">
-            {categories.map((cat) => (
-              <TabsTrigger
-                key={cat}
-                value={cat}
-                className={cn(
-                  "tabs-trigger text-neon-orange txt-shadow-neon-orange hover:text-neon-yellow hover:bg-neon-orange/50",
-                  category === cat &&
-                    "cursor-not-allowed bg-neon-orange text-white"
-                )}
-              >
-                {cat}
-              </TabsTrigger>
+      <div className="flex justify-between items-center bg-slate-900/80 border border-neon-orange rounded-lg px-4 py-3 shadow-neon-orange gap-10">
+        <CategorySelector
+          type="tabs"
+          categories={categories}
+          category={category}
+          onCategoryChange={setCategory}
+        />
+        <SearchBar />
+      </div>
+
+      {/* รายการโพสต์ */}
+
+      <h2 className="text-lg font-bold mt-4">{`Blogs in ${category}`}</h2>
+
+      {isLoading && posts.length === 0 ? (
+        <p className="text-gray-500 mt-4">Loading...</p>
+      ) : error ? (
+        <p className="text-red-500 mt-4">
+          Something went wrong. Please try again.
+        </p>
+      ) : posts.length > 0 ? (
+        <>
+          <div className="grid grid-cols-2 gap-8 mt-4">
+            {posts.map((blog, index) => (
+              <BlogCard
+                key={`blog-${index}`}
+                postId={blog.id}
+                title={blog.title}
+                image={blog.image}
+                category={blog.category}
+                description={blog.description}
+                author={blog.author}
+                date={new Date(blog.date).toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              />
             ))}
-          </TabsList>
-          <SearchBar />
-        </div>
+          </div>
 
-        {/* รายการโพสต์ */}
-        <TabsContent value={category}>
-          <h2 className="text-lg font-bold mt-4">{`Blogs in ${category}`}</h2>
-
-          {isLoading && posts.length === 0 ? (
-            <p className="text-gray-500 mt-4">Loading...</p>
-          ) : error ? (
-            <p className="text-red-500 mt-4">
-              Something went wrong. Please try again.
-            </p>
-          ) : posts.length > 0 ? (
-            <>
-              <div className="grid grid-cols-2 gap-8 mt-4">
-                {posts.map((blog) => (
-                  <BlogCard
-                    key={blog.id}
-                    postId={blog.id}
-                    title={blog.title}
-                    image={blog.image}
-                    category={blog.category}
-                    description={blog.description}
-                    author={blog.author}
-                    date={new Date(blog.date).toLocaleDateString("en-GB", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  />
-                ))}
-              </div>
-
-              {hasMore && (
-                <div className="text-center mt-8">
-                  <button
-                    className="text-neon-orange txt-shadow-neon-orange border border-neon-orange rounded-lg px-4 py-2 hover:text-neon-yellow hover:bg-neon-orange/50 active:bg-neon-orange"
-                    onClick={handleLoadMore}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Loading..." : "View More"}
-                  </button>
-                </div>
-              )}
-            </>
-          ) : (
-            <p className="text-gray-500 mt-4">
-              No posts found in this category.
-            </p>
+          {hasMore && (
+            <div className="text-center mt-8">
+              <button
+                className="text-neon-orange txt-shadow-neon-orange border border-neon-orange rounded-lg px-4 py-2 hover:text-neon-yellow hover:bg-neon-orange/50 active:bg-neon-orange"
+                onClick={handleLoadMore}
+                disabled={isLoading}
+              >
+                {isLoading ? "Loading..." : "View More"}
+              </button>
+            </div>
           )}
-        </TabsContent>
-      </Tabs>
+        </>
+      ) : (
+        <p className="text-gray-500 mt-4">No posts found in this category.</p>
+      )}
     </div>
   );
 }
@@ -691,7 +107,6 @@ export function CategoryDropDown() {
     }
   };
 
-
   useEffect(() => {
     fetchPosts();
   }, [category, page, fetchPosts]);
@@ -701,40 +116,13 @@ export function CategoryDropDown() {
       <SearchBar />
 
       {/* Navigation Menu */}
-      <NavigationMenu>
-        <NavigationMenuList>
-          <NavigationMenuItem>
-            <NavigationMenuTrigger className="w-full flex justify-between items-center px-3 py-2 font-bold txt-shadow-neon-orange">
-              <span>{category}</span>
-              <ExpandMoreIcon />
-            </NavigationMenuTrigger>
-
-            {/* รายการ Category */}
-            <NavigationMenuContent>
-              <ul className="grid gap-3 p-4">
-                {categories.map((cat) => (
-                  <li key={cat}>
-                    <button
-                      onClick={() => setCategory(cat)}
-                      value={cat}
-                      className={cn(
-                        "block w-full text-left rounded-md p-3 text-sm font-medium transition-colors txt-shadow-neon-orange",
-                        category === cat
-                          ? "bg-neon-orange text-white cursor-not-allowed"
-                          : "hover:bg-neon-orange/50 hover:text-neon-yellow"
-                      )}
-                      disabled={category === cat}
-                    >
-                      {cat}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
-        </NavigationMenuList>
-      </NavigationMenu>
-
+      <CategorySelector
+        type="dropdown"
+        categories={categories}
+        category={category}
+        onCategoryChange={setCategory}
+        className="w-full"
+      />
       {/* รายการ Blog ที่กรองแล้ว */}
       <h2 className="text-lg font-bold mt-4">{`Blogs in ${category}`}</h2>
 
@@ -747,8 +135,8 @@ export function CategoryDropDown() {
       ) : posts.length > 0 ? (
         <>
           <ul className="grid grid-cols-1 gap-4 mt-4">
-            {posts.map((blog) => (
-              <li key={blog.id}>
+            {posts.map((blog, index) => (
+              <li key={`blog-${index}`}>
                 <BlogCard
                   postId={blog.id}
                   title={blog.title}
@@ -785,40 +173,102 @@ export function CategoryDropDown() {
   );
 }
 
-// SearchBar with debounce and search functionality
 export function SearchBar({ onSearch }) {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1); // เก็บตำแหน่งที่เลือกใน dropdown
+  const [isFilled, setIsFilled] = useState(false); // ตรวจสอบว่าได้เติมค่าแล้วหรือยัง
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (searchKeyword.length > 0) {
-      setIsLoading(true);
-      const fetchSuggestions = async () => {
+  // Debounced function to fetch suggestions
+  const fetchSuggestions = useCallback(
+    debounce(async (keyword) => {
+      if (keyword.length > 0) {
+        setIsLoading(true);
         try {
           const response = await axios.get(
-            `https://blog-post-project-api.vercel.app/posts?search=${searchKeyword}`
+            `https://blog-post-project-api.vercel.app/posts?search=${keyword}`
           );
-          setSuggestions(response.data.posts);
+          // Filter suggestions based on keyword
+          const filteredSuggestions = response.data.posts.filter(
+            (post) => post.title.toLowerCase().includes(keyword.toLowerCase()) // กรอง title ที่มี keyword
+          );
+          setSuggestions(filteredSuggestions);
           setIsLoading(false);
         } catch (error) {
           console.error("Error fetching suggestions:", error);
+          setSuggestions([]);
+        } finally {
           setIsLoading(false);
         }
-      };
-      fetchSuggestions();
-    } else {
-      setSuggestions([]);
-    }
-  }, [searchKeyword]);
+      } else {
+        setSuggestions([]); // หากไม่มีคำค้นหาจะล้างคำแนะนำ
+      }
+    }, 500),
+    []
+  );
 
+  // Handle the search input change
   const handleSearch = (e) => {
-    e.preventDefault();
-    setSearchKeyword(e.target.value);
-    onSearch && onSearch(e.target.value); // Pass searchKeyword to parent if needed
+    const value = e.target.value;
+    setSearchKeyword(value);
+    fetchSuggestions(value); // Trigger debounced search
+    onSearch && onSearch(value); // Pass searchKeyword to parent if needed
   };
+
+  // Handle keydown for arrow navigation and Enter key
+  const handleKeyDown = (e) => {
+    if (e.key === "ArrowDown") {
+      // Move down the list
+      setSelectedIndex((prevIndex) =>
+        prevIndex < suggestions.length - 1 ? prevIndex + 1 : prevIndex
+      );
+    } else if (e.key === "ArrowUp") {
+      // Move up the list
+      setSelectedIndex((prevIndex) =>
+        prevIndex > 0 ? prevIndex - 1 : prevIndex
+      );
+    } else if (e.key === "Enter") {
+      // If a suggestion is selected, fill the input with the selected suggestion
+      if (selectedIndex >= 0 && !isFilled) {
+        setSearchKeyword(suggestions[selectedIndex].title); // Fill input with selected suggestion
+        setIsFilled(true); // Mark as filled
+      } else {
+        // If already filled, navigate to the post or perform search
+        if (selectedIndex >= 0) {
+          navigate(`/post/${suggestions[selectedIndex].id}`);
+        } else {
+          navigate(`/search?query=${searchKeyword}`);
+        }
+      }
+    }
+  };
+
+  // Handle search button click
+  const handleSearchClick = () => {
+    if (selectedIndex >= 0) {
+      navigate(`/post/${suggestions[selectedIndex].id}`);
+    } else {
+      navigate(`/search?query=${searchKeyword}`);
+    }
+  };
+
+  // Handle dropdown item click
+  const handleDropdownItemClick = (suggestion) => {
+    setSearchKeyword(suggestion.title); // Autofill the input with the selected suggestion's title
+    setSelectedIndex(suggestions.indexOf(suggestion)); // Set the selected index
+    setShowDropdown(false); // Close the dropdown
+    setIsFilled(true); // Mark as filled when a suggestion is clicked
+  };
+
+  useEffect(() => {
+    // Clean up the debounced function on unmount
+    return () => {
+      fetchSuggestions.cancel();
+    };
+  }, [fetchSuggestions]);
 
   return (
     <div className="relative rounded-lg bg-orange-200 hover:bg-orange-300 border border-neon-orange shadow-neon-orange w-full flex items-center">
@@ -830,37 +280,38 @@ export function SearchBar({ onSearch }) {
         aria-label="search"
         value={searchKeyword}
         onChange={handleSearch}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            navigate(`/post/${searchKeyword}`);
+        onKeyDown={handleKeyDown} // Handle keydown for arrow keys and enter
+        onFocus={() => setShowDropdown(true)}
+        onBlur={(e) => {
+          if (!e.relatedTarget || !e.relatedTarget.closest(".dropdown-item")) {
+            setShowDropdown(false);
           }
         }}
-        onFocus={() => setShowDropdown(true)}
-        onBlur={() => {
-          setTimeout(() => {
-            setShowDropdown(false);
-          }, 200);
-        }}
       />
-      {!isLoading && showDropdown && suggestions.length > 0 && (
+      {showDropdown && (
         <div className="absolute top-full left-0 right-0 mt-2 rounded-lg bg-orange-200 shadow-neon-orange z-10">
-          {suggestions.map((suggestion) => (
-            <button
-              key={suggestion._id}
-              className="p-2 hover:bg-orange-300 cursor-pointer"
-              onClick={() => {
-                navigate(`/post/${suggestion._id}`);
-                setShowDropdown(false);
-              }}
-            >
-              {suggestion.title}
-            </button>
-          ))}
+          {isLoading ? (
+            <p className="p-2 text-gray-500">Loading...</p>
+          ) : suggestions.length > 0 ? (
+            suggestions.map((suggestion, index) => (
+              <button
+                key={suggestion.id}
+                className={`dropdown-item w-full items-center p-2 hover:bg-orange-300 hover:rounded-lg cursor-pointer ${
+                  selectedIndex === index ? "bg-orange-300 rounded-lg" : ""
+                }`} // Highlight the selected suggestion
+                onClick={() => handleDropdownItemClick(suggestion)} // Select suggestion
+              >
+                {suggestion.title}
+              </button>
+            ))
+          ) : (
+            <p className="p-2 text-gray-500">No results found</p>
+          )}
         </div>
       )}
       <button
         className="absolute right-2 top-1/2 -translate-y-1/2 text-orange-500 hover:text-neon-orange"
-        onClick={() => navigate(`/post/create`)}
+        onClick={handleSearchClick} // Search or select suggestion
       >
         <SearchIcon />
       </button>
