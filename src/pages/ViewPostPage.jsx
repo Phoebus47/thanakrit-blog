@@ -5,7 +5,7 @@ import { ViewPost } from "@/components/ViewPost";
 function ViewPostPage() {
   return (
     <>
-      <BackgroundLoader imageUrl="https://i.imgur.com/UASlokn.jpg">
+      <BackgroundLoader imageUrl="/images/bg.webp">
         <Navbar />
         <ViewPost />
         <Footer />

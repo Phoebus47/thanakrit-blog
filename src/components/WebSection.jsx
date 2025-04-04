@@ -57,7 +57,7 @@ export function HeroSection() {
       title: "Code the \nFuture, \nShape the Web",
       description:
         "Explore the world of modern web development, futuristic UI, and cyberpunk-inspired innovation.",
-      image: "https://i.imgur.com/2uO8uEZ.jpg",
+      image: "/images/avartar.webp",
       author: {
         name: "Thanakrit T.",
         role: "-Author",
@@ -66,6 +66,20 @@ export function HeroSection() {
       },
     },
   ];
+
+  useEffect(() => {
+    document.title = "My Personal Blog - Tech & Cyberpunk UI";
+
+    const meta = document.createElement("meta");
+    meta.name = "description";
+    meta.content =
+      "Explore the world of modern web development, futuristic UI, and cyberpunk-inspired innovation.";
+    document.head.appendChild(meta);
+
+    return () => {
+      document.head.removeChild(meta); // Cleanup เมื่อ component ถูก unmount
+    };
+  }, []);
 
   // ตั้งค่า cookies ใน useEffect
   useEffect(() => {
@@ -96,7 +110,6 @@ export function HeroSection() {
             <img
               src={section.image}
               alt={section.author.name}
-              loading="lazy"
               className="w-full h-full object-cover rounded-lg fade-mask"
               onLoad={(e) => (e.target.style.opacity = 1)}
               style={{ opacity: 0, transition: "opacity 0.5s ease-in-out" }}
@@ -169,18 +182,21 @@ export const Footer = () => {
             <a
               href="https://www.linkedin.com/in/thanakrit-thanyawatsakul/"
               className="hover:text-gray-300 transition"
+              aria-label="LinkedIn Profile"
             >
               <LinkedIn fontSize="large" />
             </a>
             <a
               href="https://github.com/Phoebus47"
               className="hover:text-gray-300 transition"
+              aria-label="GitHub Profile"
             >
               <GitHub fontSize="large" />
             </a>
             <a
               href="mailto:thanakrit.than.biz@gmail.com"
               className="hover:text-gray-300 transition"
+              aria-label="Email"
             >
               <Google fontSize="large" />
             </a>

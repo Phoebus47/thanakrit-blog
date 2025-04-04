@@ -271,9 +271,9 @@ export function SearchBar({ onSearch }) {
   }, [fetchSuggestions]);
 
   return (
-    <div className="relative rounded-lg bg-orange-200 hover:bg-orange-300 border border-neon-orange shadow-neon-orange w-full flex items-center">
+    <div className="relative rounded-lg bg-neon-yellow/10 hover:bg-neon-yellow/20 border border-neon-orange shadow-neon-orange w-full flex items-center">
       <Input
-        className="text-orange-500 placeholder-orange-400 pl-4 pr-12 py-2 w-full bg-transparent focus:outline-none rounded-lg font-orbitron"
+        className="text-neon-orange pl-4 pr-12 py-2 w-full bg-transparent focus:outline-none rounded-lg font-orbitron"
         type="text"
         name="search"
         placeholder="Search…"
@@ -311,6 +311,8 @@ export function SearchBar({ onSearch }) {
       )}
       <button
         className="absolute right-2 top-1/2 -translate-y-1/2 text-orange-500 hover:text-neon-orange"
+        aria-label="Search"
+        onMouseDown={(e) => e.preventDefault()} // Prevent focus loss on button click
         onClick={handleSearchClick} // Search or select suggestion
       >
         <SearchIcon />
@@ -322,12 +324,13 @@ export function SearchBar({ onSearch }) {
 // BlogCard
 export function BlogCard({
   postId, // รับค่า postId
-  image,
+  image, // รูปที่ใช้ (ถ้ามี)
   category,
   title,
   description,
   author,
   date,
+  authorImage, // เพิ่ม prop สำหรับ image ของ author
 }) {
   return (
     <div className="flex flex-col gap-4">
@@ -335,7 +338,7 @@ export function BlogCard({
       <Link to={`/post/${postId}`} className="relative h-[212px] sm:h-[360px]">
         <img
           className="w-full h-full object-cover rounded-md"
-          src={image || "https://via.placeholder.com/300"}
+          src={image ? `/images/${postId}.webp` : "https://via.placeholder.com/300"}
           alt={title}
         />
       </Link>
@@ -355,8 +358,9 @@ export function BlogCard({
         </p>
         <div className="flex items-center text-sm">
           <img
-            className="w-8 h-8 rounded-full mr-2"
-            src="https://res.cloudinary.com/dcbpjtd1r/image/upload/v1728449784/my-blog-post/xgfy0xnvyemkklcqodkg.jpg"
+            className="w-8 h-8 rounded-full object-cover mr-2"
+            // เปลี่ยนเป็นใช้รูปจาก local แทน
+            src="/images/author-image.webp"
             alt={author || "Unknown"}
           />
           <span>{author || "Unknown Author"}</span>
