@@ -12,7 +12,7 @@ export function useFetchPosts(category, page, searchQuery = "") {
     setError(null);
 
     try {
-      const categoryParam = category === "Highlight" ? null : category; // ไม่กรอง category ถ้าเป็น Highlight
+      const categoryParam = category === "Highlight" ? undefined : category; // ไม่กรอง category ถ้าเป็น Highlight
       const response = await axios.get(
         "https://blog-post-project-api.vercel.app/posts",
         {
