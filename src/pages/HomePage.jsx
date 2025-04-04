@@ -5,7 +5,7 @@ import { BackgroundLoader } from "@/components/BackgroundLoader";
 function HomePage() {
   return (
     <>
-      <BackgroundLoader imageUrl="https://i.imgur.com/UASlokn.jpg">
+      <BackgroundLoader imageUrl="/images/bg.webp">
         <Navbar />
         <HeroSection />
         <ArticleSection />

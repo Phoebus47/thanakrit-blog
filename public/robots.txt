@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://thanakrit-blog.vercel.app/sitemap.xml
