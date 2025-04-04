@@ -15,15 +15,15 @@ export function BackgroundLoader({ imageUrl, children }) {
     }
   }, [imageUrl]);
 
-  const bgClass = backgroundLoaded
-    ? `bg-[url(${imageUrl})]`
-    : "bg-slate-950"; // ใช้พื้นหลังสีชั่วคราว
-
   return (
     <div
-      className={`font-orbitron ${bgClass} bg-fixed bg-cover md:bg-contain sm:bg-cover bg-center`}
-    >
-      {children}
-    </div>
+  className="font-orbitron bg-fixed bg-cover md:bg-contain sm:bg-cover bg-center"
+  style={{
+    backgroundImage: backgroundLoaded ? `url(${imageUrl})` : "none",
+    backgroundColor: backgroundLoaded ? "transparent" : "#0f172a", // slate-950
+  }}
+>
+  {children}
+</div>
   );
 }
