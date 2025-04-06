@@ -37,8 +37,10 @@ export function ViewPost() {
             <>
               {post.image && (
                 <img
-                  src={post.image}
-                  alt={post.title}
+                  src={`http://localhost:3001/proxy?url=${encodeURIComponent(
+                    post.image
+                  )}`}
+                  alt="..."
                   className="w-full mb-8 rounded-lg shadow-lg markdown.img"
                 />
               )}
@@ -65,13 +67,21 @@ export function ViewPost() {
                         {...props}
                       />
                     ),
-                    img: ({ node, ...props }) => (
-                      <img
-                        className="w-full rounded-lg shadow-lg my-4"
-                        {...props}
-                        alt={props.alt || ""}
-                      />
-                    ),
+                    img: ({ node, ...props }) => {
+                      const proxiedSrc = props.src?.startsWith("http")
+                        ? `/api/image-proxy?url=${encodeURIComponent(
+                            props.src
+                          )}`
+                        : props.src;
+
+                      return (
+                        <img
+                          className="w-full rounded-lg shadow-lg my-4"
+                          src={proxiedSrc}
+                          alt={props.alt || ""}
+                        />
+                      );
+                    },
                     a: ({ node, ...props }) => (
                       <a
                         className="text-neon-pink underline hover:text-white"
