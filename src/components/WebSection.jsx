@@ -57,7 +57,8 @@ export function HeroSection() {
       title: "Code the \nFuture, \nShape the Web",
       description:
         "Explore the world of modern web development, futuristic UI, and cyberpunk-inspired innovation.",
-      image: "/images/avartar.webp",
+      image:
+        "http://localhost:3001/proxy?url=https://res.cloudinary.com/djaxbeibd/image/upload/w_auto,c_limit/v1743968377/avartar_damkm6.webp",
       author: {
         name: "Thanakrit T.",
         role: "-Author",
@@ -70,14 +71,28 @@ export function HeroSection() {
   useEffect(() => {
     document.title = "My Personal Blog - Tech & Cyberpunk UI";
 
-    const meta = document.createElement("meta");
-    meta.name = "description";
-    meta.content =
+    const metaDescription = document.createElement("meta");
+    metaDescription.name = "description";
+    metaDescription.content =
       "Explore the world of modern web development, futuristic UI, and cyberpunk-inspired innovation.";
-    document.head.appendChild(meta);
+    document.head.appendChild(metaDescription);
+
+    const ogImage = document.createElement("meta");
+    ogImage.setAttribute("property", "og:image");
+    ogImage.content =
+      "http://localhost:3001/proxy?url=https://res.cloudinary.com/djaxbeibd/image/upload/w_400,e_blur:100,q_80,c_limit/v1743968377/avartar_damkm6.webp";
+    document.head.appendChild(ogImage);
+
+    const ogDescription = document.createElement("meta");
+    ogDescription.setAttribute("property", "og:description");
+    ogDescription.content =
+      "Explore the world of modern web development, futuristic UI, and cyberpunk-inspired innovation.";
+    document.head.appendChild(ogDescription);
 
     return () => {
-      document.head.removeChild(meta); // Cleanup เมื่อ component ถูก unmount
+      document.head.removeChild(metaDescription);
+      document.head.removeChild(ogImage);
+      document.head.removeChild(ogDescription);
     };
   }, []);
 
@@ -106,14 +121,24 @@ export function HeroSection() {
               {section.description}
             </p>
           </div>
-          <div className="h-[400px] w-auto max-w-[400px] mb-8 flex items-center justify-center">
+          <div className="relative h-[400px] w-auto max-w-[400px] mb-8 flex items-center justify-center overflow-hidden rounded-lg">
+            {/* Placeholder blurry image */}
+            <img
+              src="http://localhost:3001/proxy?url=https://res.cloudinary.com/djaxbeibd/image/upload/w_400,e_blur:100,q_80,c_limit/v1743968377/avartar_damkm6.webp"
+              alt="blur-placeholder"
+              className="absolute w-full h-full object-cover fade-mask transition-opacity duration-700 opacity-0"
+              aria-hidden="true"
+            />
+
+            {/* Main image */}
             <img
               src={section.image}
               alt={section.author.name}
-              className="w-full h-full object-cover rounded-lg fade-mask"
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+              className="relative w-full h-full object-cover fade-mask transition-opacity duration-700 opacity-0"
               onLoad={(e) => (e.target.style.opacity = 1)}
-              style={{ opacity: 0, transition: "opacity 0.5s ease-in-out" }}
-              crossOrigin="anonymous"
             />
           </div>
           <div>
@@ -145,14 +170,24 @@ export function HeroSection() {
               {section.description}
             </p>
           </div>
-          <div className="h-[400px] w-[400px] max-w-[400px] mb-8 flex items-center justify-center">
+          <div className="relative h-[400px] w-auto max-w-[400px] mb-8 flex items-center justify-center overflow-hidden rounded-lg">
+            {/* Placeholder blurry image */}
+            <img
+              src="http://localhost:3001/proxy?url=https://res.cloudinary.com/djaxbeibd/image/upload/w_400,e_blur:100,q_80,c_limit/v1743968377/avartar_damkm6.webp"
+              alt="blur-placeholder"
+              className="absolute w-full h-full object-cover fade-mask transition-opacity duration-700 opacity-0"
+              aria-hidden="true"
+            />
+
+            {/* Main image */}
             <img
               src={section.image}
               alt={section.author.name}
-              loading="lazy"
-              className="w-full h-full object-cover rounded-lg fade-mask"
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+              className="relative w-full h-full object-cover fade-mask transition-opacity duration-700 opacity-0"
               onLoad={(e) => (e.target.style.opacity = 1)}
-              style={{ opacity: 0, transition: "opacity 0.5s ease-in-out" }}
             />
           </div>
           <div className="w-1/3 pl-8">

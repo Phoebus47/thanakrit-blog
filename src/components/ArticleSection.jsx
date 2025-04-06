@@ -321,7 +321,6 @@ export function SearchBar({ onSearch }) {
   );
 }
 
-// BlogCard
 export function BlogCard({
   postId, // รับค่า postId
   image, // รูปที่ใช้ (ถ้ามี)
@@ -330,15 +329,21 @@ export function BlogCard({
   description,
   author,
   date,
-  authorImage, // เพิ่ม prop สำหรับ image ของ author
 }) {
+  const proxyUrl = "http://localhost:3001/proxy?url="; // URL ของ proxy API
+
+  // ใช้ proxy API เพื่อดึงภาพหลัก
+  const imageUrl = image
+    ? `${proxyUrl}${encodeURIComponent(image)}`
+    : "https://via.placeholder.com/300";
+
   return (
     <div className="flex flex-col gap-4">
       {/* Dynamic Link */}
       <Link to={`/post/${postId}`} className="relative h-[212px] sm:h-[360px]">
         <img
           className="w-full h-full object-cover rounded-md"
-          src={image ? `/images/${postId}.webp` : "https://via.placeholder.com/300"}
+          src={imageUrl} // ใช้ proxy API ดึงภาพ
           alt={title}
         />
       </Link>
@@ -357,10 +362,12 @@ export function BlogCard({
           {description || "No description available."}
         </p>
         <div className="flex items-center text-sm">
+          {/* ใช้ proxy API สำหรับรูปโปรไฟล์ผู้เขียน */}
           <img
             className="w-8 h-8 rounded-full object-cover mr-2"
-            // เปลี่ยนเป็นใช้รูปจาก local แทน
-            src="/images/author-image.webp"
+            src={`http://localhost:3001/proxy?url=${encodeURIComponent(
+              "https://res.cloudinary.com/dcbpjtd1r/image/upload/v1728449784/my-blog-post/xgfy0xnvyemkklcqodkg.jpg"
+            )}`}
             alt={author || "Unknown"}
           />
           <span>{author || "Unknown Author"}</span>
@@ -376,7 +383,7 @@ export function BlogCard({
 function ArticleSection() {
   return (
     <main className="max-w-10/12 mx-auto bg-slate-950/70 border border-neon-orange inset-ring shadow-neon-orange p-6 md:p-8 rounded-lg w-full">
-      <h1 className="text-3xl font-semibold text-neon-yellow txt-shadow-neon-orange text-left mb-4">
+      <h1 className="text-4xl font-semibold text-neon-yellow txt-shadow-neon-orange text-left mb-4">
         Latest Articles
       </h1>
 
