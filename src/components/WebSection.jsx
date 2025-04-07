@@ -126,7 +126,7 @@ export function HeroSection() {
             <img
               src="http://localhost:3001/proxy?url=https://res.cloudinary.com/djaxbeibd/image/upload/w_400,e_blur:100,q_80,c_limit/v1743968377/avartar_damkm6.webp"
               alt="blur-placeholder"
-              className="absolute w-full h-full object-cover fade-mask transition-opacity duration-700 opacity-0"
+              className="absolute w-full h-full object-cover fade-mask transition-opacity duration-700"
               aria-hidden="true"
             />
 
@@ -137,7 +137,7 @@ export function HeroSection() {
               loading="eager"
               decoding="async"
               fetchPriority="high"
-              className="relative w-full h-full object-cover fade-mask transition-opacity duration-700 opacity-0"
+              className="relative w-full h-full object-cover fade-mask transition-opacity duration-700"
               onLoad={(e) => (e.target.style.opacity = 1)}
             />
           </div>
