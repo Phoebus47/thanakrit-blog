@@ -6,11 +6,28 @@ import fetch from "node-fetch";
 const app = express();
 const PORT = 3001;
 
+// Whitelisted origins for both dev and production
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://thanakrit-blog.vercel.app/", // เปลี่ยนเป็น domain จริงตอน deploy
+];
+
 // Enable compression
 app.use(compression());
 
-// Enable CORS
-app.use(cors());
+// Dynamic CORS middleware
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 
 // Image proxy endpoint
 app.get("/proxy", async (req, res) => {
@@ -47,14 +64,15 @@ app.get("/proxy", async (req, res) => {
       return res.status(response.status).send("Failed to fetch image");
     }
 
-    // ✅ Important CORS header for proxy responses
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    const requestOrigin = req.headers.origin;
+    if (allowedOrigins.includes(requestOrigin)) {
+      res.setHeader("Access-Control-Allow-Origin", requestOrigin);
+      res.setHeader("Access-Control-Allow-Credentials", "true");
+    }
 
     // ✅ Security headers
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.setHeader("X-Frame-Options", "DENY");
-
-    // ✅ Allow image sources from anywhere (or specify whitelisted domains)
     res.setHeader(
       "Content-Security-Policy",
       "default-src 'none'; img-src * data: blob:;"
