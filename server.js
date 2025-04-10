@@ -51,7 +51,7 @@ app.get("/proxy", async (req, res) => {
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    const timeout = setTimeout(() => controller.abort(), 5000);
 
     const response = await fetch(targetUrl, {
       signal: controller.signal,
