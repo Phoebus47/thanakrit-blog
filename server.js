@@ -9,7 +9,7 @@ const PORT = 3001;
 // Whitelisted origins for both dev and production
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://thanakrit-blog.vercel.app/", // เปลี่ยนเป็น domain จริงตอน deploy
+  "https://thanakrit-blog.vercel.app/",
 ];
 
 // Enable compression
