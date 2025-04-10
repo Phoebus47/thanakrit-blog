@@ -122,15 +122,6 @@ export function HeroSection() {
             </p>
           </div>
           <div className="relative h-[400px] w-auto max-w-[400px] mb-8 flex items-center justify-center overflow-hidden rounded-lg">
-            {/* Placeholder blurry image */}
-            <img
-              src="http://localhost:3001/proxy?url=https://res.cloudinary.com/djaxbeibd/image/upload/w_400,e_blur:100,q_80,c_limit/v1743968377/avartar_damkm6.webp"
-              alt="blur-placeholder"
-              className="absolute w-full h-full object-cover fade-mask transition-opacity duration-700"
-              aria-hidden="true"
-            />
-
-            {/* Main image */}
             <img
               src={section.image}
               alt={section.author.name}
@@ -171,15 +162,6 @@ export function HeroSection() {
             </p>
           </div>
           <div className="relative h-[400px] w-auto max-w-[400px] mb-8 flex items-center justify-center overflow-hidden rounded-lg">
-            {/* Placeholder blurry image */}
-            <img
-              src="http://localhost:3001/proxy?url=https://res.cloudinary.com/djaxbeibd/image/upload/w_400,e_blur:100,q_80,c_limit/v1743968377/avartar_damkm6.webp"
-              alt="blur-placeholder"
-              className="absolute w-full h-full object-cover fade-mask transition-opacity duration-700 opacity-0"
-              aria-hidden="true"
-            />
-
-            {/* Main image */}
             <img
               src={section.image}
               alt={section.author.name}
