@@ -9,7 +9,7 @@ const PORT = 3001;
 // Whitelisted origins for both dev and production
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://thanakrit-blog.vercel.app/",
+  "https://thanakrit-blog.vercel.app",
 ];
 
 // Enable compression
@@ -51,7 +51,7 @@ app.get("/proxy", async (req, res) => {
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    const timeout = setTimeout(() => controller.abort(), 5000);
 
     const response = await fetch(targetUrl, {
       signal: controller.signal,
