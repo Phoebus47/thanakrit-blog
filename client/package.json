@@ -8,7 +8,7 @@
     "start": "vite preview",
     "build": "npm run generate-sitemap && vite build",
     "lint": "eslint .",
-    "generate-sitemap": "node client/scripts/generate-sitemap.js"
+    "generate-sitemap": "node scripts/generate-sitemap.js"
   },
   "dependencies": {
     "@mui/icons-material": "^6.4.7",
