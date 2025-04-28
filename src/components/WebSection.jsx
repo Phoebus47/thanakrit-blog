@@ -14,7 +14,7 @@ export const Navbar = () => {
     <div className="w-full">
       <nav className="max-w-10/12 mx-auto flex justify-between items-center p-6">
         <div>
-          <h1 className="text-3xl font-semibold text-neon-pink txt-shadow-neon-pink">
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold text-neon-pink txt-shadow-neon-pink">
             TinCodeSpace<span className="text-neon-pink"> .</span>
           </h1>
         </div>
@@ -57,8 +57,7 @@ export function HeroSection() {
       title: "Code the \nFuture, \nShape the Web",
       description:
         "Explore the world of modern web development, futuristic UI, and cyberpunk-inspired innovation.",
-      image:
-        "http://localhost:3001/proxy?url=https://res.cloudinary.com/djaxbeibd/image/upload/w_auto,c_limit/v1743968377/avartar_damkm6.webp",
+      image: "/images/avartar.webp",
       author: {
         name: "Thanakrit T.",
         role: "-Author",
@@ -79,8 +78,7 @@ export function HeroSection() {
 
     const ogImage = document.createElement("meta");
     ogImage.setAttribute("property", "og:image");
-    ogImage.content =
-      "http://localhost:3001/proxy?url=https://res.cloudinary.com/djaxbeibd/image/upload/w_400,e_blur:100,q_80,c_limit/v1743968377/avartar_damkm6.webp";
+    ogImage.content = "/images/avartar.webp";
     document.head.appendChild(ogImage);
 
     const ogDescription = document.createElement("meta");
@@ -94,13 +92,6 @@ export function HeroSection() {
       document.head.removeChild(ogImage);
       document.head.removeChild(ogDescription);
     };
-  }, []);
-
-  // ตั้งค่า cookies ใน useEffect
-  useEffect(() => {
-    // กำหนดค่า cookie ใน document
-    document.cookie =
-      "yourCookie=value; path=/; domain=example.com; Secure; SameSite=None";
   }, []);
 
   return (
