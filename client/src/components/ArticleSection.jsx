@@ -30,7 +30,7 @@ export function StyledTabs() {
 
   return (
     <div className="w-full mt-4 text-neon-orange txt-shadow-neon-orange">
-      <div className="flex justify-between items-center bg-slate-900/80 border border-neon-orange rounded-lg px-4 py-3 shadow-neon-orange gap-10">
+      <div className="flex justify-between items-center bg-gradient-to-r from-slate-900/80 via-yellow-900/10 to-yellow-100/0 border border-neon-orange rounded-lg px-4 py-3 shadow-[0_0_24px_#ffe066] gap-10">
         <CategorySelector
           type="tabs"
           categories={categories}
@@ -121,7 +121,7 @@ export function CategoryDropDown() {
         categories={categories}
         category={category}
         onCategoryChange={setCategory}
-        className="w-full"
+        className="w-full bg-gradient-to-r from-slate-900/80 via-yellow-900/10 to-yellow-100/0 border border-neon-orange shadow-[0_0_16px_#ffe066] rounded-lg font-bold text-neon-orange txt-shadow-neon-orange"
       />
       {/* รายการ Blog ที่กรองแล้ว */}
       <h2 className="text-lg font-bold mt-4">{`Blogs in ${category}`}</h2>
@@ -273,7 +273,7 @@ export function SearchBar({ onSearch }) {
   return (
     <div className="relative rounded-lg bg-neon-yellow/10 hover:bg-neon-yellow/20 border border-neon-orange shadow-neon-orange w-full flex items-center">
       <Input
-        className="text-neon-orange pl-4 pr-12 py-2 w-full bg-transparent focus:outline-none rounded-lg font-orbitron"
+        className="text-neon-orange pl-4 pr-12 py-2 w-full bg-transparent border border-neon-orange shadow-[0_0_12px_#ffe066] focus:outline-none focus:border-neon-yellow focus:shadow-[0_0_24px_#ffe066] rounded-lg font-orbitron placeholder:text-neon-yellow placeholder:font-semibold transition-all duration-300"
         type="text"
         name="search"
         placeholder="Search…"
@@ -289,28 +289,30 @@ export function SearchBar({ onSearch }) {
         }}
       />
       {showDropdown && (
-        <div className="absolute top-full left-0 right-0 mt-2 rounded-lg bg-orange-200 shadow-neon-orange z-10">
+        <div className="absolute top-full left-0 right-0 mt-2 rounded-lg bg-gradient-to-br from-slate-900/90 via-yellow-900/30 to-yellow-100/0 border border-yellow-300/30 shadow-[0_0_24px_#ffe066] z-10">
           {isLoading ? (
-            <p className="p-2 text-gray-500">Loading...</p>
+            <p className="p-2 text-neon-yellow">Loading...</p>
           ) : suggestions.length > 0 ? (
             suggestions.map((suggestion, index) => (
               <button
                 key={suggestion.id}
-                className={`dropdown-item w-full items-center p-2 hover:bg-orange-300 hover:rounded-lg cursor-pointer ${
-                  selectedIndex === index ? "bg-orange-300 rounded-lg" : ""
-                }`} // Highlight the selected suggestion
-                onClick={() => handleDropdownItemClick(suggestion)} // Select suggestion
+                className={`dropdown-item w-full items-center p-2 text-neon-yellow font-semibold bg-transparent hover:bg-yellow-300/20 hover:text-neon-orange hover:rounded-lg cursor-pointer transition-all duration-200 ${
+                  selectedIndex === index
+                    ? "bg-yellow-300/20 text-neon-orange rounded-lg"
+                    : ""
+                }`}
+                onClick={() => handleDropdownItemClick(suggestion)}
               >
                 {suggestion.title}
               </button>
             ))
           ) : (
-            <p className="p-2 text-gray-500">No results found</p>
+            <p className="p-2 text-neon-yellow">No results found</p>
           )}
         </div>
       )}
       <button
-        className="absolute right-2 top-1/2 -translate-y-1/2 text-orange-500 hover:text-neon-orange"
+        className="absolute right-2 top-1/2 -translate-y-1/2 text-neon-yellow hover:text-neon-orange drop-shadow-[0_0_8px_#ffe066] transition-all duration-200"
         aria-label="Search"
         onMouseDown={(e) => e.preventDefault()} // Prevent focus loss on button click
         onClick={handleSearchClick} // Search or select suggestion
@@ -371,8 +373,8 @@ export function BlogCard({
 // ArticleSection
 function ArticleSection() {
   return (
-    <main className="max-w-10/12 mx-auto bg-slate-950/70 border border-neon-orange inset-ring shadow-neon-orange p-6 md:p-8 rounded-lg w-full">
-      <h1 className="text-4xl font-semibold text-neon-yellow txt-shadow-neon-orange text-left mb-4">
+    <main className="max-w-10/12 mx-auto bg-gradient-to-br from-orange-100/10 via-yellow-100/5 to-yellow-100/0 border border-orange-300 shadow-[0_0_32px_4px_#ffe066] p-6 md:p-8 rounded-2xl w-full backdrop-blur-md">
+      <h1 className="text-4xl font-semibold bg-gradient-to-r from-orange-400 via-yellow-400 to-yellow-300 bg-clip-text text-transparent txt-shadow-neon-orange text-left mb-4 drop-shadow-[0_0_18px_#ffe066]">
         Latest Articles
       </h1>
 
