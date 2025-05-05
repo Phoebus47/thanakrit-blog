@@ -10,20 +10,22 @@
     "db:pull:prod": "npx prisma db pull --schema=prisma/schema.prisma --env-file=.env.production",
     "start": "NODE_ENV=production node app.mjs",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "generate": "npx prisma generate"
+    "generate": "npx prisma generate",
+    "build": "npx prisma generate",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^6.6.0",
+    "prisma": "^6.6.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "pg": "^8.15.6"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10",
-    "prisma": "^6.6.0"
+    "nodemon": "^3.1.10"
   }
 }
