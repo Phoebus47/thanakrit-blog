@@ -1,9 +1,10 @@
 import express from "express";
 import prisma from "../utils/prisma.mjs";
+import { validatePostInput } from "../middlewares/postValidation.mjs";
 
 const postRoutes = express.Router();
 
-postRoutes.post("/", async (req, res) => {
+postRoutes.post("/", validatePostInput, async (req, res) => {
   try {
     const {
       title,
@@ -84,7 +85,7 @@ postRoutes.get("/:postId", async (req, res) => {
   }
 });
 
-postRoutes.put("/:postId", async (req, res) => {
+postRoutes.put("/:postId", validatePostInput, async (req, res) => {
   try {
     const postId = Number(req.params.postId);
     const {
