@@ -15,5 +15,7 @@
       "dest": "app.mjs"
     }
   ],
-  "buildCommand": "npm install && npx prisma generate"
+  "buildCommand": "npm install && npx prisma generate && npm run build",
+  "outputDirectory": "dist",
+  "ignoreCommand": "echo ''"
 }
