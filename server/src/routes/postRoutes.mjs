@@ -1,8 +1,8 @@
-import express from "express";
+import { Router } from "express";
 import prisma from "../utils/prisma.mjs";
 import { validatePostInput } from "../middlewares/postValidation.mjs";
 
-const postRoutes = express.Router();
+const postRoutes = Router();
 
 postRoutes.post("/", validatePostInput, async (req, res) => {
   try {
