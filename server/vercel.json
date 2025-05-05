@@ -1,16 +1,19 @@
 {
-    "version": 2,
-    "builds": [
-      {
-        "src": "app.mjs",
-        "use": "@vercel/node"
+  "version": 2,
+  "builds": [
+    {
+      "src": "app.mjs",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["prisma/schema.prisma"]
       }
-    ],
-    "routes": [
-      {
-        "src": "/(.*)",
-        "dest": "app.mjs"
-      }
-    ]
-  }
-  
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "app.mjs"
+    }
+  ],
+  "buildCommand": "npm install && npx prisma generate"
+}
