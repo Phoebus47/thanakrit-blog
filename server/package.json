@@ -9,7 +9,8 @@
     "db:pull:dev": "npx prisma db pull --schema=prisma/schema.prisma --env-file=.env",
     "db:pull:prod": "npx prisma db pull --schema=prisma/schema.prisma --env-file=.env.production",
     "start": "NODE_ENV=production node app.mjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "generate": "npx prisma generate"
   },
   "keywords": [],
   "author": "",
