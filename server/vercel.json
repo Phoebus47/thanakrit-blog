@@ -5,7 +5,10 @@
       "src": "app.mjs",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["prisma/schema.prisma"]
+        "includeFiles": [
+          "prisma/schema.prisma",
+          ".env.production"
+        ]
       }
     }
   ],
@@ -14,6 +17,5 @@
       "src": "/(.*)",
       "dest": "app.mjs"
     }
-  ],
-  "buildCommand": "npm install && npx prisma generate"
+  ]
 }
