@@ -305,3 +305,15 @@ input {
   margin: 2em 0;
   border-radius: 12px;
 }
+
+@keyframes glow {
+  0% {
+    filter: drop-shadow(0 0 8px #00fff7) drop-shadow(0 0 16px #ff00ff);
+  }
+  100% {
+    filter: drop-shadow(0 0 24px #00fff7) drop-shadow(0 0 32px #ff00ff);
+  }
+}
+.animate-glow {
+  animation: glow 2s ease-in-out infinite alternate;
+}

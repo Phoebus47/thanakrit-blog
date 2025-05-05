@@ -1,7 +1,7 @@
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 import { useNavigate } from "react-router-dom";
 import { BackgroundLoader } from "@/components/BackgroundLoader";
-import { Navbar, Footer } from "../components/WebSection";
+import { NavBar, Footer } from "../components/WebSection";
 
 function NotFoundPage() {
   const navigate = useNavigate();
@@ -9,7 +9,7 @@ function NotFoundPage() {
   return (
     <>
       <BackgroundLoader imageUrl="/images/bg.webp">
-        <Navbar />
+        <NavBar />
         <div className="flex flex-col items-center justify-center h-screen text-neon-white txt-shadow-neon-red">
           <ErrorOutlineRoundedIcon
             className="text-neon-red mb-4"
@@ -21,7 +21,7 @@ function NotFoundPage() {
           </p>
           <button
             onClick={() => navigate("/")}
-            className="px-6 py-3 bg-neon-red shadow-neon-red text-white rounded-lg hover:bg-neon-red/80 hover:shadow-neon-red transition duration-300"
+            className="px-6 py-3 bg-gradient-to-r from-neon-red via-neon-yellow to-neon-orange shadow-[0_0_24px_#ff3ec9] text-slate-900 font-bold rounded-full hover:from-neon-yellow hover:to-neon-red hover:text-white hover:shadow-[0_0_32px_#ffe066] transition-all duration-300"
           >
             Go to Homepage
           </button>

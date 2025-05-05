@@ -1,14 +1,16 @@
-import { Navbar, Footer } from "../components/WebSection";
+import { NavBar, Footer } from "../components/WebSection";
 import { BackgroundLoader } from "@/components/BackgroundLoader";
-import { ViewPost } from "@/components/ViewPost";
+import { ViewPost, LoadingScreen } from "@/components/ViewPost";
+import { useState } from "react";
 
 function ViewPostPage() {
+  const [isLoading, setIsLoading] = useState(true);
   return (
     <>
       <BackgroundLoader imageUrl="/images/bg.webp">
-        <Navbar />
-        <ViewPost />
-        <Footer />
+        <NavBar />
+        <ViewPost onLoadingChange={setIsLoading} />
+        {isLoading ? <LoadingScreen /> : <Footer />}
       </BackgroundLoader>
     </>
   );
