@@ -11,7 +11,7 @@
     "start": "NODE_ENV=production node app.mjs",
     "test": "echo \"Error: no test specified\" && exit 1",
     "generate": "npx prisma generate",
-    "build": "prisma generate && vite build"
+    "build": "npx prisma generate"
   },
   "keywords": [],
   "author": "",
