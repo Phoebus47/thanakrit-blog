@@ -17,6 +17,5 @@
       "src": "/(.*)",
       "dest": "app.mjs"
     }
-  ],
-  "buildCommand": "node vercel-build.mjs"
+  ]
 }
