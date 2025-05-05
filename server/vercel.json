@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/index.mjs",
+      "src": "app.mjs",
       "use": "@vercel/node",
       "config": {
         "includeFiles": [
@@ -15,7 +15,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "api/index.mjs"
+      "dest": "app.mjs"
     }
   ],
   "buildCommand": "node vercel-build.mjs"
