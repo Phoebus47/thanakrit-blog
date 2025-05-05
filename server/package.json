@@ -2,18 +2,27 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.mjs",
+  "type": "module",
   "scripts": {
-    "start": "nodemon app.mjs",
+    "dev": "nodemon app.mjs",
+    "db:pull:dev": "npx prisma db pull --schema=prisma/schema.prisma --env-file=.env",
+    "db:pull:prod": "npx prisma db pull --schema=prisma/schema.prisma --env-file=.env.production",
+    "start": "NODE_ENV=production node app.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
+    "@prisma/client": "^6.6.0",
     "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
     "express": "^5.1.0",
-    "nodemon": "^3.1.10"
+    "pg": "^8.15.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "prisma": "^6.6.0"
   }
 }

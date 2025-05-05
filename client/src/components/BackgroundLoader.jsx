@@ -10,8 +10,8 @@ export function BackgroundLoader({ imageUrl, children }) {
     img.onload = () => setBackgroundLoaded(true);
 
     // ✅ ตั้งค่า cookie ถ้ายังไม่มี
-    if (!document.cookie.includes("yourCookie=value")) {
-      document.cookie = "yourCookie=value; path=/; Secure; SameSite=None";
+    if (!document.cookie.includes("accept_cookie=true")) {
+      document.cookie = "accept_cookie=true; path=/; Secure; SameSite=None";
     }
   }, [imageUrl]);
 
