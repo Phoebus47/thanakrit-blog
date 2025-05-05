@@ -15,7 +15,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@contexts/authentication";
 
-export function ViewPost() {
+export function ViewPost({ onLoadingChange }) {
   const [img, setImg] = useState("");
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
@@ -33,11 +33,13 @@ export function ViewPost() {
   const user = state.user;
 
   useEffect(() => {
+    if (onLoadingChange) onLoadingChange(true);
     getPost();
+    // eslint-disable-next-line
   }, []);
 
   const getPost = async () => {
-    setIsLoading(true);
+    if (onLoadingChange) onLoadingChange(true);
     try {
       const postsResponse = await axios.get(
         `https://blog-post-project-api-with-db.vercel.app/posts/${param.postId}`
@@ -63,6 +65,8 @@ export function ViewPost() {
       console.error("Error fetching post data:", error);
       setIsLoading(false);
       navigate("*");
+    } finally {
+      if (onLoadingChange) onLoadingChange(false);
     }
   };
 
@@ -81,12 +85,12 @@ export function ViewPost() {
       </div>
       <div className="flex flex-col xl:flex-row gap-6">
         <div className="xl:w-3/4 space-y-8 px-4">
-          <article className="bg-slate-950/50 rounded-lg p-4 shadow-lg">
+          <article className="bg-gradient-to-br from-slate-900/80 via-fuchsia-900/40 to-blue-900/30 rounded-2xl p-6 shadow-[0_0_32px_4px_#ffe066] border border-yellow-300/30">
             <div className="flex items-center justify-start mb-4 gap-4">
-              <span className="bg-none border shadow-neon-blue rounded-full px-3 py-1 text-sm font-semibold inset-ring text-neon-blue txt-shadow-neon-blue hover:border-neon-blue hover:bg-neon-blue hover:text-white">
+              <span className="bg-gradient-to-r from-orange-400 via-yellow-400 to-yellow-300 text-slate-900 font-semibold rounded-full px-3 py-1 text-sm shadow-[0_0_8px_#ffe066] border border-yellow-200/60">
                 {category || "Uncategorized"}
               </span>
-              <span className="text-neon-orange txt-shadow-neon-orange text-sm font-semibold">
+              <span className="text-yellow-200 txt-shadow-neon-orange text-sm font-semibold">
                 {date
                   ? new Date(date).toLocaleDateString("en-GB", {
                       day: "numeric",
@@ -97,10 +101,10 @@ export function ViewPost() {
               </span>
             </div>
 
-            <h1 className="text-neon-orange txt-shadow-neon-orange text-3xl font-semibold">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-400 via-yellow-400 to-yellow-300 bg-clip-text text-transparent drop-shadow-[0_0_18px_#ffe066] mb-2">
               {title}
             </h1>
-            <p className="text-white txt-shadow-neon-orange mb-4">
+            <p className="text-yellow-100/90 txt-shadow-neon-orange mb-4">
               {description || "No description available"}
             </p>
             <div className="markdown">
@@ -224,7 +228,7 @@ function Share({ likesAmount, setDialogState, user, setLikes }) {
         <button
           onClick={handleLikeClick}
           disabled={isLiking}
-          className={`flex items-center justify-center space-x-2 px-11 py-3 rounded-full text-white border border-white transition-colors group ${
+          className={`flex items-center justify-center space-x-2 px-11 py-3 rounded-full font-bold bg-gradient-to-r from-orange-400 via-yellow-400 to-yellow-300 text-slate-900 shadow-[0_0_12px_#ffe066] border border-yellow-200/60 hover:from-yellow-400 hover:to-orange-400 hover:shadow-[0_0_24px_#ffe066] transition-all duration-300 ${
             isLiking
               ? "bg-gray-800 cursor-not-allowed text-gray-500 border-gray-300"
               : "bg-gradient-to-r from-neon-blue to-neon-purple hover:bg-gradient-to-l hover:from-neon-orange hover:to-neon-blue"
@@ -256,31 +260,31 @@ function Share({ likesAmount, setDialogState, user, setLikes }) {
                 </div>
               ));
             }}
-            className="bg-gradient-to-r from-neon-orange to-neon-pink flex flex-1 items-center justify-center space-x-2 px-11 py-3 rounded-full text-white border border-white hover:bg-gradient-to-l hover:from-neon-blue hover:to-neon-orange transition-colors group"
+            className="bg-gradient-to-r from-neon-orange to-neon-pink flex flex-1 items-center justify-center space-x-2 px-11 py-3 rounded-full text-white border border-neon-pink shadow-[0_0_16px_#ff3ec9] hover:scale-105 hover:shadow-[0_0_32px_#ffe066] transition-all duration-300 group"
           >
-            <Copy className="w-5 h-5 text-white transition-colors group-hover:text-neon-pink" />
-            <span className="text-white font-medium transition-colors group-hover:text-neon-pink">
+            <Copy className="w-5 h-5 text-slate-900 transition-colors group-hover:text-neon-yellow" />
+            <span className="text-slate-900 font-medium transition-colors group-hover:text-neon-yellow">
               Copy
             </span>
           </button>
           <a
             href={`https://www.facebook.com/share.php?u=${shareLink}`}
             target="_blank"
-            className="bg-gradient-to-r from-neon-orange to-neon-blue p-3 rounded-full border text-white border-white hover:bg-gradient-to-l hover:from-neon-blue hover:to-neon-orange transition-colors"
+            className="bg-gradient-to-r from-neon-orange to-neon-blue p-3 rounded-full border border-neon-blue shadow-[0_0_12px_#00fff7] text-white hover:scale-110 hover:shadow-[0_0_32px_#ff3ec9] transition-all duration-300"
           >
             <FacebookIcon className="h-6 w-6" />
           </a>
           <a
             href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareLink}`}
             target="_blank"
-            className="bg-gradient-to-r from-neon-orange to-neon-blue p-3 rounded-full border text-white border-white hover:bg-gradient-to-l hover:from-neon-blue hover:to-neon-orange transition-colors"
+            className="bg-gradient-to-r from-neon-blue to-neon-pink p-3 rounded-full border border-neon-pink shadow-[0_0_12px_#ff3ec9] text-white hover:scale-110 hover:shadow-[0_0_32px_#00fff7] transition-all duration-300"
           >
             <LinkedinIcon className="h-6 w-6" />
           </a>
           <a
             href={`https://www.twitter.com/share?&url=${shareLink}`}
             target="_blank"
-            className="bg-gradient-to-r from-neon-orange to-neon-blue p-3 rounded-full border text-white border-white hover:bg-gradient-to-l hover:from-neon-blue hover:to-neon-orange transition-colors"
+            className="bg-gradient-to-r from-neon-pink to-neon-orange p-3 rounded-full border border-neon-orange shadow-[0_0_12px_#ffe066] text-white hover:scale-110 hover:shadow-[0_0_32px_#ffe066] transition-all duration-300"
           >
             <TwitterIcon className="h-6 w-6" />
           </a>
@@ -331,8 +335,8 @@ function Comment({ setDialogState, commentList, setComments, user }) {
 
   return (
     <div>
-      <div className="space-y-4 px-4 mb-16">
-        <h3 className="text-lg font-semibold text-neon-orange txt-shadow-neon-orange">
+      <div className="space-y-4 px-4 mb-16 bg-gradient-to-br from-slate-900/80 via-fuchsia-900/30 to-blue-900/30 border border-pink-400/40 shadow-[0_0_24px_#ff3ec9] rounded-2xl p-6">
+        <h3 className="text-lg font-semibold text-neon-pink txt-shadow-neon-pink">
           Comment
         </h3>
         <form className="space-y-2 relative" onSubmit={handleSendComment}>
@@ -346,8 +350,8 @@ function Comment({ setDialogState, commentList, setComments, user }) {
             }}
             onChange={(e) => setCommentText(e.target.value)}
             placeholder="What are your thoughts?"
-            className={`w-full p-4 h-24 resize-none py-3 rounded-sm placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-muted-foreground ${
-              isError ? "border-red-500" : "bg-gray-800"
+            className={`w-full p-4 h-24 resize-none py-3 rounded-md placeholder:text-neon-blue bg-slate-900/80 text-white focus-visible:ring-0 focus-visible:ring-offset-0 ${
+              isError ? "border-red-500" : "border-pink-400/40"
             }`}
           />
           {isError && (
@@ -358,7 +362,7 @@ function Comment({ setDialogState, commentList, setComments, user }) {
           <div className="flex justify-end">
             <button
               type="submit"
-              className="px-8 py-2 font-semibold border bg-gradient-to-r from-neon-blue to-neon-orange text-white hover:text-neon-pink rounded-full hover:bg-gradient-to-l hover:from-neon-orange hover:to-neon-blue transition-colors"
+              className="px-8 py-2 font-bold bg-gradient-to-r from-neon-pink via-neon-yellow to-neon-orange text-neon-purple rounded-full shadow-[0_0_16px_#ff3ec9] border border-pink-400/60 hover:from-neon-yellow hover:to-neon-pink hover:shadow-[0_0_32px_#ffe066] transition-all duration-300"
             >
               Send
             </button>
@@ -367,19 +371,24 @@ function Comment({ setDialogState, commentList, setComments, user }) {
       </div>
       <div className="space-y-6 px-4">
         {commentList.map((comment, index) => (
-          <div key={index} className="flex flex-col gap-2 mb-4">
+          <div
+            key={index}
+            className="flex flex-col gap-2 mb-4 bg-slate-900/70 border border-neon-blue/40 rounded-xl p-3 shadow-[0_0_12px_#00fff7]"
+          >
             <div className="flex space-x-4">
               <div className="flex-shrink-0">
                 <img
                   src={comment.profile_pic}
                   alt={comment.name}
-                  className="rounded-full w-12 h-12 object-cover"
+                  className="rounded-full w-12 h-12 object-cover border-2 border-neon-blue shadow-[0_0_8px_#00fff7]"
                 />
               </div>
               <div className="flex-grow">
                 <div className="flex flex-col items-start justify-between">
-                  <h4 className="font-semibold text-white">{comment.name}</h4>
-                  <span className="text-sm text-gray-400">
+                  <h4 className="font-semibold text-neon-blue txt-shadow-neon-blue">
+                    {comment.name}
+                  </h4>
+                  <span className="text-sm text-neon-yellow/80">
                     {new Date(comment.created_at)
                       .toLocaleString("en-GB", {
                         day: "2-digit",
@@ -394,9 +403,9 @@ function Comment({ setDialogState, commentList, setComments, user }) {
                 </div>
               </div>
             </div>
-            <p className="text-gray-300">{comment.comment_text}</p>
+            <p className="text-neon-pink/90">{comment.comment_text}</p>
             {index < commentList.length - 1 && (
-              <hr className="border-gray-700 my-4" />
+              <hr className="border-neon-blue/30 my-4" />
             )}
           </div>
         ))}
@@ -407,7 +416,7 @@ function Comment({ setDialogState, commentList, setComments, user }) {
 
 function AuthorBio() {
   return (
-    <div className="bg-gradient-to-r from-blue-900/50 to-purple-900/50 p-6 text-white txt-shadow-neon-purple sticky top-6 overflow-hidden rounded-2xl h-auto shadow-lg">
+    <div className="bg-gradient-to-br from-blue-900/80 via-fuchsia-900/40 to-purple-900/60 p-6 text-white txt-shadow-neon-purple rounded-2xl shadow-[0_0_24px_#00fff7] border border-fuchsia-400/40">
       <div className="flex items-center mb-4">
         <div className="flex items-center w-16 h-16 rounded-full overflow-hidden border-2 border-cyan-400 shadow-lg mr-4">
           <img
@@ -472,7 +481,7 @@ function CreateAccountModal({ dialogState, setDialogState }) {
   );
 }
 
-function LoadingScreen() {
+export function LoadingScreen() {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div className="flex flex-col items-center space-y-4">
