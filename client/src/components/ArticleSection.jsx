@@ -1,6 +1,5 @@
 import { Input } from "@/components/ui/input";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
 import { useState, useEffect, useCallback } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import { useFetchPosts } from "@/hooks/useFetchPosts";
@@ -178,25 +177,29 @@ export function SearchBar({ onSearch }) {
   const [suggestions, setSuggestions] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(-1); // เก็บตำแหน่งที่เลือกใน dropdown
-  const [isFilled, setIsFilled] = useState(false); // ตรวจสอบว่าได้เติมค่าแล้วหรือยัง
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [isFilled, setIsFilled] = useState(false);
   const navigate = useNavigate();
 
-  // Debounced function to fetch suggestions
+  // แก้ไข fetchSuggestions ให้ใช้ backend API
   const fetchSuggestions = useCallback(
     debounce(async (keyword) => {
       if (keyword.length > 0) {
         setIsLoading(true);
         try {
-          const response = await axios.get(
-            `https://blog-post-project-api.vercel.app/posts?search=${keyword}`
+          const response = await fetch(
+            `${import.meta.env.VITE_SERVER_URL}/posts?keyword=${keyword}&limit=5`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
           );
-          // Filter suggestions based on keyword
-          const filteredSuggestions = response.data.posts.filter(
-            (post) => post.title.toLowerCase().includes(keyword.toLowerCase()) // กรอง title ที่มี keyword
-          );
-          setSuggestions(filteredSuggestions);
-          setIsLoading(false);
+
+          if (!response.ok) throw new Error("Failed to fetch suggestions");
+
+          const data = await response.json();
+          setSuggestions(data.posts || []);
         } catch (error) {
           console.error("Error fetching suggestions:", error);
           setSuggestions([]);
@@ -204,7 +207,7 @@ export function SearchBar({ onSearch }) {
           setIsLoading(false);
         }
       } else {
-        setSuggestions([]); // หากไม่มีคำค้นหาจะล้างคำแนะนำ
+        setSuggestions([]);
       }
     }, 500),
     []

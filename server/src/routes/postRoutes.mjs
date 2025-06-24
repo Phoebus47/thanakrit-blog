@@ -4,6 +4,7 @@ import { validatePostInput } from "../middlewares/postValidation.mjs";
 
 const postRoutes = Router();
 
+// CREATE a new post
 postRoutes.post("/", validatePostInput, async (req, res) => {
   try {
     const {
@@ -53,21 +54,46 @@ postRoutes.post("/", validatePostInput, async (req, res) => {
   }
 });
 
-postRoutes.get("/:postId", async (req, res) => {
+// GET all posts with filtering and pagination
+postRoutes.get("/", async (req, res) => {
   try {
-    const postId = Number(req.params.postId);
-    const post = await prisma.posts.findUnique({
-      where: { id: postId },
-      include: { categories: true },
-    });
+    const { page = 1, limit = 6, category, keyword } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const take = parseInt(limit);
 
-    if (!post) {
-      return res
-        .status(404)
-        .json({ message: "Server could not find a requested post" });
+    // สร้าง where condition
+    const where = {};
+
+    if (category && category !== "Highlight") {
+      where.category_id = parseInt(category);
     }
 
-    return res.status(200).json({
+    if (keyword) {
+      where.OR = [
+        { title: { contains: keyword, mode: "insensitive" } },
+        { description: { contains: keyword, mode: "insensitive" } },
+      ];
+    }
+
+    // Fetch posts
+    const posts = await prisma.posts.findMany({
+      where,
+      include: {
+        categories: true,
+        statuses: true,
+      },
+      orderBy: { date: "desc" },
+      skip,
+      take,
+    });
+
+    // Count total posts
+    const totalPosts = await prisma.posts.count({ where });
+    const totalPages = Math.ceil(totalPosts / take);
+    const hasMore = page < totalPages;
+
+    // Format response
+    const formattedPosts = posts.map((post) => ({
       id: post.id,
       image: post.image,
       category: post.categories?.name,
@@ -77,14 +103,61 @@ postRoutes.get("/:postId", async (req, res) => {
       date: post.date,
       status_id: post.status_id,
       likes_count: post.likes_count,
+    }));
+
+    return res.status(200).json({
+      posts: formattedPosts,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages,
+        hasMore,
+        totalPosts,
+      },
     });
   } catch (error) {
+    console.error("Error fetching posts:", error);
+    return res.status(500).json({
+      message: "Server could not read posts because database connection",
+    });
+  }
+});
+
+// GET single post by ID
+postRoutes.get("/:postId", async (req, res) => {
+  try {
+    const postId = Number(req.params.postId);
+    const post = await prisma.posts.findUnique({
+      where: { id: postId },
+      include: { categories: true },
+    });
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Format response
+    const formattedPost = {
+      id: post.id,
+      image: post.image,
+      category: post.categories?.name,
+      title: post.title,
+      description: post.description,
+      content: post.content,
+      date: post.date,
+      status_id: post.status_id,
+      likes_count: post.likes_count,
+    };
+
+    return res.status(200).json(formattedPost);
+  } catch (error) {
+    console.error("Error fetching post:", error);
     return res.status(500).json({
       message: "Server could not read post because database connection",
     });
   }
 });
 
+// UPDATE a post by ID
 postRoutes.put("/:postId", validatePostInput, async (req, res) => {
   try {
     const postId = Number(req.params.postId);
@@ -128,6 +201,7 @@ postRoutes.put("/:postId", validatePostInput, async (req, res) => {
   }
 });
 
+// DELETE a post by ID
 postRoutes.delete("/:postId", async (req, res) => {
   try {
     const postId = Number(req.params.postId);
@@ -143,64 +217,6 @@ postRoutes.delete("/:postId", async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       message: "Server could not delete post because database connection",
-    });
-  }
-});
-
-postRoutes.get("/", async (req, res) => {
-  try {
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 6;
-    const category = req.query.category;
-    const keyword = req.query.keyword;
-
-    const where = {};
-
-    if (category) {
-      where.category_id = Number(category);
-    }
-
-    if (keyword) {
-      where.OR = [
-        { title: { contains: keyword, mode: "insensitive" } },
-        { description: { contains: keyword, mode: "insensitive" } },
-        { content: { contains: keyword, mode: "insensitive" } },
-      ];
-    }
-
-    const totalPosts = await prisma.posts.count({ where });
-    const totalPages = Math.ceil(totalPosts / limit);
-
-    const posts = await prisma.posts.findMany({
-      where,
-      skip: (page - 1) * limit,
-      take: limit,
-      include: { categories: true },
-      orderBy: { date: "desc" },
-    });
-
-    return res.status(200).json({
-      totalPosts,
-      totalPages,
-      currentPage: page,
-      limit,
-      posts: posts.map((post) => ({
-        id: post.id,
-        image: post.image,
-        category: post.categories?.name,
-        title: post.title,
-        description: post.description,
-        content: post.content,
-        date: post.date,
-        status_id: post.status_id,
-        likes_count: post.likes_count,
-      })),
-      nextPage: page < totalPages ? page + 1 : null,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      message: "Server could not read post because database connection",
     });
   }
 });

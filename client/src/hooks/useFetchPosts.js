@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useState, useEffect, useCallback } from "react";
 
 export function useFetchPosts(category, page, searchQuery = "") {
@@ -12,25 +11,33 @@ export function useFetchPosts(category, page, searchQuery = "") {
     setError(null);
 
     try {
-      const categoryParam = category === "Highlight" ? undefined : category; // ไม่กรอง category ถ้าเป็น Highlight
-      const response = await axios.get(
-        "https://blog-post-project-api.vercel.app/posts",
-        {
-          params: {
-            page: page,
-            limit: 6, // ปรับจำนวนโพสต์ต่อหน้า
-            category: categoryParam,
-            search: searchQuery, // รองรับการค้นหา
-          },
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: "6"
+      });
+
+      if (category && category !== "Highlight") {
+        const categoryMap = { "Cat": "1", "Inspiration": "2", "General": "3" };
+        if (categoryMap[category]) {
+          params.append('category', categoryMap[category]);
         }
-      );
+      }
+
+      if (searchQuery) {
+        params.append('keyword', searchQuery);
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/posts?${params}`);
+      
+      if (!response.ok) throw new Error('Failed to fetch posts');
+      
+      const data = await response.json();
 
       setPosts((prevPosts) =>
-        page === 1
-          ? response.data.posts
-          : [...prevPosts, ...response.data.posts]
+        page === 1 ? data.posts : [...prevPosts, ...data.posts]
       );
-      setHasMore(response.data.currentPage < response.data.totalPages);
+      
+      setHasMore(data.pagination.hasMore);
     } catch (error) {
       console.error("Error fetching posts:", error);
       setError("Something went wrong. Please try again.");

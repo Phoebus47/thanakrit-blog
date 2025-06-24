@@ -1,7 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable react/prop-types */
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const AuthContext = React.createContext();
@@ -16,26 +15,38 @@ function AuthProvider(props) {
 
   const navigate = useNavigate();
 
-  // Fetch user details using Supabase API
+  // Fetch user details using Backend API
   const fetchUser = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setState((prevState) => ({
-        ...prevState,
-        user: null,
-        getUserLoading: false,
-      }));
-      return;
-    }
-
     try {
       setState((prevState) => ({ ...prevState, getUserLoading: true }));
-      const response = await axios.get(
-        "https://blog-post-project-api-with-db.vercel.app/auth/get-user"
-      );
+      
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setState((prevState) => ({
+          ...prevState,
+          user: null,
+          getUserLoading: false,
+        }));
+        return;
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        localStorage.removeItem('authToken');
+        throw new Error('Invalid token');
+      }
+
+      const userData = await response.json();
+      
       setState((prevState) => ({
         ...prevState,
-        user: response.data,
+        user: userData,
         getUserLoading: false,
       }));
     } catch (error) {
@@ -45,25 +56,39 @@ function AuthProvider(props) {
         user: null,
         getUserLoading: false,
       }));
+      localStorage.removeItem('authToken');
     }
   };
 
   useEffect(() => {
-    fetchUser(); // Load user on initial app load
+    fetchUser();
   }, []);
 
   // Login user
   const login = async (data) => {
     try {
       setState((prevState) => ({ ...prevState, loading: true, error: null }));
-      const response = await axios.post(
-        "https://blog-post-project-api-with-db.vercel.app/auth/login",
-        data
-      );
-      const token = response.data.access_token;
-      localStorage.setItem("token", token);
+      
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+        }),
+      });
 
-      // Fetch and set user details
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(responseData.message || 'Login failed');
+      }
+
+      // Store token in localStorage
+      localStorage.setItem('authToken', responseData.token);
+
       setState((prevState) => ({ ...prevState, loading: false, error: null }));
       navigate("/");
       await fetchUser();
@@ -71,9 +96,9 @@ function AuthProvider(props) {
       setState((prevState) => ({
         ...prevState,
         loading: false,
-        error: error.response?.data?.error || "Login failed",
+        error: error.message,
       }));
-      return { error: error.response?.data?.error || "Login failed" };
+      return { error: error.message };
     }
   };
 
@@ -81,25 +106,41 @@ function AuthProvider(props) {
   const register = async (data) => {
     try {
       setState((prevState) => ({ ...prevState, loading: true, error: null }));
-      await axios.post(
-        "https://blog-post-project-api-with-db.vercel.app/auth/register",
-        data
-      );
+      
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+          name: data.name,
+          username: data.username,
+        }),
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(responseData.message || 'Registration failed');
+      }
+
       setState((prevState) => ({ ...prevState, loading: false, error: null }));
       navigate("/sign-up/success");
     } catch (error) {
       setState((prevState) => ({
         ...prevState,
         loading: false,
-        error: error.response?.data?.error || "Registration failed",
+        error: error.message,
       }));
-      return { error: state.error };
+      return { error: error.message };
     }
   };
 
   // Logout user
-  const logout = () => {
-    localStorage.removeItem("token");
+  const logout = async () => {
+    localStorage.removeItem('authToken');
     setState({ user: null, error: null, loading: null });
     navigate("/");
   };

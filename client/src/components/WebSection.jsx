@@ -11,11 +11,11 @@ export const NavBar = () => {
 
   return (
     <div className="w-full bg-slate-950/70 border-b border-neon-blue shadow-[0_0_24px_2px_#00fff7] z-50 mb-8 backdrop-blur-md">
-      <nav className="max-w-7xl mx-auto flex justify-between items-center p-6">
+      <nav className="flex justify-between items-center p-6">
         {/* Logo */}
         <div>
           <h1
-            className="text-3xl md:text-4xl font-orbitron font-extrabold bg-gradient-to-r from-neon-pink via-pink-500 to-fuchsia-400 bg-clip-text text-transparent drop-shadow-[0_0_18px_#ff3ec9] animate-glow cursor-pointer select-none"
+            className="text-xl sm:text-2xl md:text-3xl lg:text-4xl md:whitespace-break-spaces text-left font-orbitron font-extrabold bg-gradient-to-r from-neon-pink via-pink-500 to-fuchsia-400 bg-clip-text text-transparent drop-shadow-[0_0_18px_#ff3ec9] animate-glow cursor-pointer select-none"
             style={{
               WebkitTextStroke: "1.5px #fff",
               letterSpacing: "0.06em",
@@ -24,7 +24,7 @@ export const NavBar = () => {
             }}
             onClick={() => navigate("/")}
           >
-            TinCodeSpace<span className="text-neon-yellow"> .</span>
+            Thanakrit CodeSpace .
           </h1>
         </div>
         {/* Hamburger */}
@@ -33,7 +33,22 @@ export const NavBar = () => {
           onClick={toggleMenu}
           aria-label="Toggle menu"
         >
-          <MenuRounded fontSize="large" />
+          <MenuRounded
+            fontSize="large"
+            style={{
+              color: "#ff3ec9", // สีหลัก neon-pink
+              filter: `
+                      drop-shadow(0 0 18px #ff3ec9) 
+                      drop-shadow(0 0 32px #ffb3fa) 
+                      drop-shadow(0 0 8px #ff3ec9) 
+                      drop-shadow(0 0 2px #fff)
+                    `,
+              stroke: "#fff",
+              strokeWidth: "1px",
+              letterSpacing: "0.06em",
+            }}
+            className="animate-glow cursor-pointer"
+          />
         </button>
         {/* Desktop Menu */}
         <div className="hidden md:flex gap-5">
@@ -54,7 +69,7 @@ export const NavBar = () => {
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden animate-fade-in-down bg-slate-950/95 border-t border-neon-blue shadow-[0_0_24px_2px_#00fff7] backdrop-blur-md">
-          <div className="flex flex-col gap-4 p-6 pt-0">
+          <div className="flex flex-col gap-4 p-6 pt-6 bg-gradient-to-b from-slate-900/80 via-fuchsia-900/40 to-blue-900/30">
             <button
               className="w-full px-6 py-4 rounded-full bg-gradient-to-r from-orange-400 via-yellow-400 to-yellow-300 text-white font-orbitron font-semibold shadow-[0_0_8px_#ffe066] border border-orange-300/60 hover:from-yellow-400 hover:to-orange-400 hover:shadow-[0_0_16px_#ffe066] hover:text-black transition-all duration-300"
               onClick={() => {
@@ -270,7 +285,7 @@ export function HeroSection() {
 //Footer
 export const Footer = () => {
   return (
-    <footer className="relative overflow-hidden p-0 mt-8">
+    <footer className="relative overflow-hidden p-0 mt-8 border-t border-neon-pink shadow-[0_0_24px_2px_#fb64b6]">
       {/* Neon Gradient Background */}
       <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#2d0036] via-[#1a0a2e] to-[#0e1b2b] opacity-95" />
       {/* Glow ring */}
@@ -340,3 +355,14 @@ export const Footer = () => {
     </footer>
   );
 };
+
+export function LoadingScreen() {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center">
+      <div className="flex flex-col items-center">
+        <Loader2 className="w-16 h-16 animate-spin text-foreground" />
+        <p className="mt-4 text-lg font-semibold">Loading...</p>
+      </div>
+    </div>
+  );
+}
