@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
-import { NavBar, Footer } from "@/components/WebSection";
+import { NavBar, Footer, LoadingScreen } from "../components/WebSection";
 import { useNavigate } from "react-router-dom";
-import { X, User, Lock } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from "@/contexts/authentication";
+import { X, User, Lock, Camera } from "lucide-react";
+import { Input } from "../components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
+import { useAuth } from "../contexts/authentication";
 import { toast } from "sonner";
+import { BackgroundLoader } from "../components/BackgroundLoader";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { state, fetchUser } = useAuth();
+  const { state, fetchUser, isAuthenticated } = useAuth();
   const [profile, setProfile] = useState({
     image: "",
     name: "",
@@ -31,10 +32,10 @@ export default function ProfilePage() {
         });
       } catch {
         toast.custom((t) => (
-          <div className="bg-neon-red text-white p-4 rounded-sm flex justify-between items-start shadow-neon-red">
+          <div className="bg-red-500/20 border border-red-500/50 rounded-lg text-white p-4 flex justify-between items-start">
             <div>
-              <h2 className="font-bold text-lg mb-1">Failed to fetch profile</h2>
-              <p className="text-sm">Please try again later.</p>
+              <h2 className="font-bold text-lg mb-1 font-orbitron">Failed to fetch profile</h2>
+              <p className="text-sm font-orbitron">Please try again later.</p>
             </div>
             <button onClick={() => toast.dismiss(t)} className="text-white hover:text-gray-200">
               <X size={20} />
@@ -63,10 +64,10 @@ export default function ProfilePage() {
     const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
       toast.custom((t) => (
-        <div className="bg-neon-red text-white p-4 rounded-sm flex justify-between items-start shadow-neon-red">
+        <div className="bg-red-500/20 border border-red-500/50 rounded-lg text-white p-4 flex justify-between items-start">
           <div>
-            <h2 className="font-bold text-lg mb-1">Invalid file type</h2>
-            <p className="text-sm">Please upload a valid image file (JPEG, PNG, GIF, WebP).</p>
+            <h2 className="font-bold text-lg mb-1 font-orbitron">Invalid file type</h2>
+            <p className="text-sm font-orbitron">Please upload a valid image file (JPEG, PNG, GIF, WebP).</p>
           </div>
           <button onClick={() => toast.dismiss(t)} className="text-white hover:text-gray-200">
             <X size={20} />
@@ -79,10 +80,10 @@ export default function ProfilePage() {
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       toast.custom((t) => (
-        <div className="bg-neon-red text-white p-4 rounded-sm flex justify-between items-start shadow-neon-red">
+        <div className="bg-red-500/20 border border-red-500/50 rounded-lg text-white p-4 flex justify-between items-start">
           <div>
-            <h2 className="font-bold text-lg mb-1">File too large</h2>
-            <p className="text-sm">Please upload an image smaller than 5MB.</p>
+            <h2 className="font-bold text-lg mb-1 font-orbitron">File too large</h2>
+            <p className="text-sm font-orbitron">Please upload an image smaller than 5MB.</p>
           </div>
           <button onClick={() => toast.dismiss(t)} className="text-white hover:text-gray-200">
             <X size={20} />
@@ -106,7 +107,7 @@ export default function ProfilePage() {
 
       let profilePicUrl = profile.image;
 
-      // Upload image to backend API แทน Supabase
+      // Upload image to backend API
       if (imageFile) {
         const formData = new FormData();
         formData.append('image', imageFile);
@@ -139,10 +140,10 @@ export default function ProfilePage() {
       if (!response.ok) throw new Error('Failed to update profile');
 
       toast.custom((t) => (
-        <div className="bg-neon-green text-white p-4 rounded-sm flex justify-between items-start shadow-neon-green">
+        <div className="bg-green-500/20 border border-green-500/50 rounded-lg text-white p-4 flex justify-between items-start">
           <div>
-            <h2 className="font-bold text-lg mb-1">Profile updated successfully</h2>
-            <p className="text-sm">Your profile changes have been saved.</p>
+            <h2 className="font-bold text-lg mb-1 font-orbitron">Success!</h2>
+            <p className="text-sm font-orbitron">Your profile has been updated successfully.</p>
           </div>
           <button onClick={() => toast.dismiss(t)} className="text-white hover:text-gray-200">
             <X size={20} />
@@ -151,10 +152,10 @@ export default function ProfilePage() {
       ));
     } catch (error) {
       toast.custom((t) => (
-        <div className="bg-neon-red text-white p-4 rounded-sm flex justify-between items-start shadow-neon-red">
+        <div className="bg-red-500/20 border border-red-500/50 rounded-lg text-white p-4 flex justify-between items-start">
           <div>
-            <h2 className="font-bold text-lg mb-1">Failed to update profile</h2>
-            <p className="text-sm">{error.message}</p>
+            <h2 className="font-bold text-lg mb-1 font-orbitron">Error</h2>
+            <p className="text-sm font-orbitron">{error.message}</p>
           </div>
           <button onClick={() => toast.dismiss(t)} className="text-white hover:text-gray-200">
             <X size={20} />
@@ -167,93 +168,66 @@ export default function ProfilePage() {
     }
   };
 
+  // ตรวจสอบ authentication
+  useEffect(() => {
+    if (state.getUserLoading === false && !isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+  }, [state.getUserLoading, isAuthenticated, navigate]);
+
+  // แสดง loading ขณะตรวจสอบ authentication
+  if (state.getUserLoading || state.getUserLoading === null) {
+    return (
+      <BackgroundLoader imageUrl="/images/bg.webp">
+        <NavBar />
+        <div className="min-h-screen flex items-center justify-center">
+          <LoadingScreen />
+        </div>
+        <Footer />
+      </BackgroundLoader>
+    );
+  }
+
+  // ถ้าไม่ได้ login ให้แสดงข้อความ
+  if (!isAuthenticated) {
+    return (
+      <BackgroundLoader imageUrl="/images/bg.webp">
+        <NavBar />
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-orbitron text-white mb-4">Access Denied</h1>
+            <p className="text-gray-400 font-orbitron">Please login to access this page.</p>
+          </div>
+        </div>
+        <Footer />
+      </BackgroundLoader>
+    );
+  }
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <BackgroundLoader imageUrl="/images/bg.webp">
       <NavBar />
-      <div className="min-h-screen md:p-8">
-        <div className="max-w-4xl mx-auto overflow-hidden">
-          {/* Desktop Header */}
-          <div className="hidden md:flex items-center p-6">
-            <Avatar className="h-14 w-14">
-              <AvatarImage
-                src={state.user?.profile_pic}
-                alt="Profile"
-                className="object-cover"
-              />
-              <AvatarFallback>
-                <User />
-              </AvatarFallback>
-            </Avatar>
-            <div className="ml-4">
-              <h1 className="text-2xl font-bold text-neon-yellow txt-shadow-neon-orange">{state.user?.name}</h1>
-            </div>
-          </div>
-
-          {/* Mobile Header */}
-          <div className="md:hidden p-4">
-            <div className="flex justify-start gap-12 items-center mb-4">
-              <div className="flex items-center space-x-2 text-neon-orange txt-shadow-neon-orange font-medium cursor-default">
-                <User className="h-5 w-5 mb-1" />
-                <span>Profile</span>
-              </div>
-              <a
-                onClick={() => navigate("/reset-password")}
-                className="flex items-center gap-2 text-neon-yellow hover:text-neon-orange transition-colors cursor-pointer"
-              >
-                <Lock className="h-5 w-5 mb-1" />
-                Reset password
-              </a>
-            </div>
-            <div className="flex items-center">
-              <Avatar className="h-10 w-10">
-                <AvatarImage
-                  src={profile.image}
-                  alt="Profile"
-                  className="object-cover"
-                />
-                <AvatarFallback>
-                  <User className="h-8 w-8" />
-                </AvatarFallback>
-              </Avatar>
-              <h2 className="ml-3 text-xl font-semibold text-neon-yellow txt-shadow-neon-orange">{profile.name}</h2>
-            </div>
-          </div>
-
-          <div className="flex flex-col md:flex-row">
-            {/* Desktop Sidebar */}
-            <aside className="hidden md:block w-64 p-6">
-              <nav>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2 text-neon-orange txt-shadow-neon-orange font-medium cursor-default">
-                    <User className="h-5 w-5 mb-1" />
-                    <span>Profile</span>
-                  </div>
-                  <a
-                    onClick={() => navigate("/reset-password")}
-                    className="flex items-center gap-2 text-neon-yellow hover:text-neon-orange transition-colors cursor-pointer"
-                  >
-                    <Lock className="h-5 w-5 mb-1" />
-                    Reset password
-                  </a>
-                </div>
-              </nav>
-            </aside>
-
-            {/* Main Content */}
-            <main className="flex-1 p-8 bg-slate-950/80 border border-neon-orange shadow-neon-orange md:m-2 md:rounded-lg">
-              <div className="flex flex-col md:flex-row items-center justify-start md:gap-6 mb-6">
-                <Avatar className="h-28 w-28 mb-5">
+      
+      <div className="min-h-screen flex items-center justify-center px-4 py-20">
+        <div className="w-full max-w-4xl">
+          <div className="bg-slate-950/80 backdrop-blur-md border border-neon-blue/40 rounded-2xl p-8 shadow-[0_0_24px_#00fff7]">
+            
+            {/* Header */}
+            <div className="flex flex-col md:flex-row items-center gap-6 mb-8">
+              <div className="relative">
+                <Avatar className="h-24 w-24 border-2 border-neon-blue shadow-[0_0_8px_#00fff7]">
                   <AvatarImage
                     src={profile.image}
                     alt="Profile"
                     className="object-cover"
                   />
-                  <AvatarFallback>
-                    <User className="h-8 w-8" />
+                  <AvatarFallback className="bg-slate-800 text-neon-blue">
+                    <User className="h-12 w-12" />
                   </AvatarFallback>
                 </Avatar>
-                <label className="px-8 py-2 bg-gradient-to-r from-neon-orange to-neon-yellow text-black font-bold rounded-full shadow-[0_0_16px_#ffe066] hover:from-neon-yellow hover:to-neon-orange hover:text-white hover:shadow-[0_0_32px_#ffe066] transition-colors cursor-pointer">
-                  Upload profile picture
+                <label className="absolute -bottom-2 -right-2 bg-neon-blue hover:bg-neon-pink transition-colors rounded-full p-2 cursor-pointer shadow-[0_0_8px_#00fff7]">
+                  <Camera className="h-4 w-4 text-white" />
                   <input
                     type="file"
                     className="sr-only"
@@ -262,67 +236,109 @@ export default function ProfilePage() {
                   />
                 </label>
               </div>
+              
+              <div className="text-center md:text-left">
+                <h1 className="text-3xl font-orbitron font-bold bg-gradient-to-r from-neon-pink via-neon-blue to-neon-green bg-clip-text text-transparent mb-2">
+                  Profile Settings
+                </h1>
+                <p className="text-gray-400 font-orbitron">
+                  Manage your account information and preferences
+                </p>
+              </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Navigation Links */}
+              <div className="ml-auto hidden md:flex gap-4">
+                <button
+                  onClick={() => navigate("/reset-password")}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer bg-slate-800/50 border border-neon-pink/40 text-neon-pink hover:bg-neon-pink/10 transition-colors font-orbitron"
+                >
+                  <Lock className="h-4 w-4" />
+                  Reset Password
+                </button>
+              </div>
+            </div>
+
+            {/* Mobile Navigation */}
+            <div className="md:hidden mb-6">
+              <button
+                onClick={() => navigate("/reset-password")}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg cursor-pointer bg-slate-800/50 border border-neon-pink/40 text-neon-pink hover:bg-neon-pink/10 transition-colors font-orbitron"
+              >
+                <Lock className="h-4 w-4" />
+                Reset Password
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label
-                    htmlFor="name"
-                    className="block text-sm font-medium text-neon-orange txt-shadow-neon-orange mb-1"
-                  >
-                    Name
+                  <label className="block text-sm font-orbitron font-semibold text-neon-blue mb-2">
+                    Full Name
                   </label>
                   <Input
-                    id="name"
                     name="name"
                     value={profile.name}
                     onChange={handleInputChange}
-                    className="mt-1 py-3 rounded-sm placeholder:text-neon-yellow text-neon-orange bg-transparent border-neon-orange focus-visible:ring-neon-yellow focus-visible:border-neon-yellow font-orbitron"
+                    className="w-full p-3 rounded-lg bg-slate-800/50 border border-neon-blue/40 text-white font-orbitron placeholder-gray-400 focus:border-neon-pink focus:outline-none focus:ring-2 focus:ring-neon-pink/20"
+                    placeholder="Enter your full name"
                   />
                 </div>
+
                 <div>
-                  <label
-                    htmlFor="username"
-                    className="block text-sm font-medium text-neon-orange txt-shadow-neon-orange mb-1"
-                  >
+                  <label className="block text-sm font-orbitron font-semibold text-neon-blue mb-2">
                     Username
                   </label>
                   <Input
-                    id="username"
                     name="username"
                     value={profile.username}
                     onChange={handleInputChange}
-                    className="mt-1 py-3 rounded-sm placeholder:text-neon-yellow text-neon-orange bg-transparent border-neon-orange focus-visible:ring-neon-yellow focus-visible:border-neon-yellow font-orbitron"
+                    className="w-full p-3 rounded-lg bg-slate-800/50 border border-neon-blue/40 text-white font-orbitron placeholder-gray-400 focus:border-neon-pink focus:outline-none focus:ring-2 focus:ring-neon-pink/20"
+                    placeholder="Choose a username"
                   />
                 </div>
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-medium text-neon-orange txt-shadow-neon-orange mb-1"
-                  >
-                    Email
-                  </label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={profile.email}
-                    disabled
-                    className="bg-slate-800/50 text-neon-yellow"
-                  />
-                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-orbitron font-semibold text-neon-blue mb-2">
+                  Email Address
+                </label>
+                <Input
+                  name="email"
+                  type="email"
+                  value={profile.email}
+                  disabled
+                  className="w-full p-3 rounded-lg bg-slate-700/50 border border-gray-600/40 text-gray-400 font-orbitron cursor-not-allowed"
+                  placeholder="Email cannot be changed"
+                />
+                <p className="text-xs text-gray-500 mt-1 font-orbitron">
+                  Email address cannot be modified for security reasons
+                </p>
+              </div>
+
+              <div className="flex gap-4 pt-4">
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="px-8 py-2 mt-2 bg-gradient-to-r from-neon-orange to-neon-yellow text-black font-bold rounded-full shadow-[0_0_16px_#ffe066] hover:from-neon-yellow hover:to-neon-orange hover:text-white hover:shadow-[0_0_32px_#ffe066] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 py-3 cursor-pointer bg-gradient-to-r from-neon-blue to-neon-pink rounded-lg font-orbitron font-semibold text-white shadow-[0_0_16px_#00fff7] hover:shadow-[0_0_24px_#00fff7] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isSaving ? "Saving..." : "Save"}
+                  {isSaving ? "Saving..." : "Save Changes"}
                 </button>
-              </form>
-            </main>
+                
+                <button
+                  type="button"
+                  onClick={() => navigate("/")}
+                  className="px-8 py-3 rounded-lg cursor-pointer border border-neon-blue/40 text-neon-blue hover:bg-neon-blue/10 transition-colors font-orbitron font-semibold"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
+
       <Footer />
-    </div>
+    </BackgroundLoader>
   );
 }

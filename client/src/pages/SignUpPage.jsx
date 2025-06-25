@@ -1,11 +1,9 @@
-import { useState } from "react";
-import { NavBar, Footer } from "@/components/WebSection";
-import { useNavigate } from "react-router-dom";
-import { Input } from "@/components/ui/input";
-import { useAuth } from "@/contexts/authentication";
-import { toast } from "sonner";
-import { X, Loader2 } from "lucide-react";
-import { BackgroundLoader } from "@/components/BackgroundLoader";
+import React, { useState } from "react";
+import { useAuth } from "../contexts/authentication";
+import { useNavigate, Link } from "react-router-dom";
+import { Loader2 } from "lucide-react";
+import { BackgroundLoader } from "../components/BackgroundLoader";
+import { NavBar, Footer } from "../components/WebSection";
 
 export default function SignUpPage() {
   const { register, state } = useAuth();
@@ -18,6 +16,7 @@ export default function SignUpPage() {
     password: "",
   });
   const [formErrors, setFormErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
 
   const validateInputs = () => {
     const errors = {};
@@ -69,177 +68,166 @@ export default function SignUpPage() {
 
     if (Object.keys(errors).length === 0) {
       const result = await register(formValues);
-      if (result?.error) {
-        let suggestionMessage = "";
-
-        // Check for email or username-related issues
-        if (result.error.toLowerCase().includes("email")) {
-          suggestionMessage = "Try using a different email address.";
-        } else if (result.error.toLowerCase().includes("username")) {
-          suggestionMessage = "Try using a different username.";
-        }
-
-        return toast.custom((t) => (
-          <div className="bg-neon-red text-white p-4 rounded-sm flex justify-between items-start shadow-neon-red">
-            <div>
-              <h2 className="font-bold text-lg mb-1">{result.error}</h2>
-              <p className="text-sm">
-                {suggestionMessage && (
-                  <span className="block mt-2 text-sm">
-                    {suggestionMessage}
-                  </span>
-                )}
-              </p>
-            </div>
-            <button
-              onClick={() => toast.dismiss(t)}
-              className="text-white hover:text-gray-200"
-            >
-              <X size={20} />
-            </button>
-          </div>
-        ));
+      
+      if (result?.success) {
+        navigate("/login"); // redirect ไปหน้า login หลัง register สำเร็จ
       }
-      navigate("/");
+      
+      if (result?.error) {
+        console.error("Registration error:", result.error);
+      }
     }
   };
 
-  const handleChange = (key, value) => {
-    setFormValues((prev) => ({ ...prev, [key]: value }));
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormValues((prev) => ({ ...prev, [name]: value }));
+    
+    // Clear error when user starts typing
+    if (formErrors[name]) {
+      setFormErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
   return (
     <BackgroundLoader imageUrl="/images/bg.webp">
-    <div className="flex flex-col min-h-screen">
       <NavBar />
-      <main className="flex justify-center items-center p-4 my-6 flex-grow">
-        <div className="w-full max-w-2xl bg-slate-950/80 border border-neon-orange shadow-neon-orange rounded-lg px-3 sm:px-20 py-14">
-          <h2 className="text-4xl font-orbitron font-semibold text-center mb-6 text-neon-yellow txt-shadow-neon-orange">
-            Sign up
-          </h2>
-          <form className="space-y-8" onSubmit={handleSubmit}>
-            <div className="relative space-y-1">
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-neon-orange txt-shadow-neon-orange"
-              >
-                Name
-              </label>
-              <Input
-                id="name"
-                placeholder="Full name"
-                value={formValues.name}
-                onChange={(e) => handleChange("name", e.target.value)}
-                className={`mt-1 py-3 rounded-sm placeholder:text-neon-yellow text-neon-orange bg-transparent border-neon-orange focus-visible:ring-neon-yellow focus-visible:border-neon-yellow font-orbitron ${
-                  formErrors.name ? "border-neon-red" : ""
-                }`}
-                disabled={state.loading}
-              />
-              {formErrors.name && (
-                <p className="text-neon-red text-xs absolute">
-                  {formErrors.name}
+
+      <div className="min-h-screen flex items-center justify-center px-4 py-20">
+        <div className="w-full max-w-md md:max-w-[798px]">
+          <div className="bg-slate-950/80 backdrop-blur-md border border-neon-blue/40 rounded-2xl p-8 shadow-[0_0_24px_#00fff7]">
+            <h1 className="text-3xl font-orbitron font-bold text-center mb-8 bg-gradient-to-r from-neon-pink via-neon-blue to-neon-green bg-clip-text text-transparent">
+              Create Account
+            </h1>
+
+            {/* Error Message */}
+            {state.error && (
+              <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg">
+                <p className="text-red-400 text-sm font-orbitron text-center">
+                  {state.error}
                 </p>
-              )}
-            </div>
-            <div className="relative space-y-1">
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium text-neon-orange txt-shadow-neon-orange"
-              >
-                Username
-              </label>
-              <Input
-                id="username"
-                placeholder="Username"
-                value={formValues.username}
-                onChange={(e) => handleChange("username", e.target.value)}
-                className={`mt-1 py-3 rounded-sm placeholder:text-neon-yellow text-neon-orange bg-transparent border-neon-orange focus-visible:ring-neon-yellow focus-visible:border-neon-yellow font-orbitron ${
-                  formErrors.username ? "border-neon-red" : ""
-                }`}
-                disabled={state.loading}
-              />
-              {formErrors.username && (
-                <p className="text-neon-red text-xs absolute">
-                  {formErrors.username}
-                </p>
-              )}
-            </div>
-            <div className="relative space-y-1">
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-neon-orange txt-shadow-neon-orange"
-              >
-                Email
-              </label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Email"
-                value={formValues.email}
-                onChange={(e) => handleChange("email", e.target.value)}
-                className={`mt-1 py-3 rounded-sm placeholder:text-neon-yellow text-neon-orange bg-transparent border-neon-orange focus-visible:ring-neon-yellow focus-visible:border-neon-yellow font-orbitron ${
-                  formErrors.email ? "border-neon-red" : ""
-                }`}
-                disabled={state.loading}
-              />
-              {formErrors.email && (
-                <p className="text-neon-red text-xs absolute">
-                  {formErrors.email}
-                </p>
-              )}
-            </div>
-            <div className="relative space-y-1">
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-neon-orange txt-shadow-neon-orange"
-              >
-                Password
-              </label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Password"
-                value={formValues.password}
-                onChange={(e) => handleChange("password", e.target.value)}
-                className={`mt-1 py-3 rounded-sm placeholder:text-neon-yellow text-neon-orange bg-transparent border-neon-orange focus-visible:ring-neon-yellow focus-visible:border-neon-yellow font-orbitron ${
-                  formErrors.password ? "border-neon-red" : ""
-                }`}
-                disabled={state.loading}
-              />
-              {formErrors.password && (
-                <p className="text-neon-red text-xs absolute">
-                  {formErrors.password}
-                </p>
-              )}
-            </div>
-            <div className="flex justify-center">
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label className="block text-sm font-orbitron font-semibold text-neon-blue mb-2">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formValues.name}
+                  onChange={handleChange}
+                  className="w-full p-3 rounded-lg bg-slate-800/50 border border-neon-blue/40 text-white font-orbitron placeholder-gray-400 focus:border-neon-pink focus:outline-none focus:ring-2 focus:ring-neon-pink/20"
+                  placeholder="Enter your full name"
+                />
+                {formErrors.name && (
+                  <p className="text-red-400 text-xs mt-1 font-orbitron">
+                    {formErrors.name}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-orbitron font-semibold text-neon-blue mb-2">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  name="username"
+                  value={formValues.username}
+                  onChange={handleChange}
+                  className="w-full p-3 rounded-lg bg-slate-800/50 border border-neon-blue/40 text-white font-orbitron placeholder-gray-400 focus:border-neon-pink focus:outline-none focus:ring-2 focus:ring-neon-pink/20"
+                  placeholder="Choose a username"
+                />
+                {formErrors.username && (
+                  <p className="text-red-400 text-xs mt-1 font-orbitron">
+                    {formErrors.username}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-orbitron font-semibold text-neon-blue mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formValues.email}
+                  onChange={handleChange}
+                  className="w-full p-3 rounded-lg bg-slate-800/50 border border-neon-blue/40 text-white font-orbitron placeholder-gray-400 focus:border-neon-pink focus:outline-none focus:ring-2 focus:ring-neon-pink/20"
+                  placeholder="Enter your email"
+                />
+                {formErrors.email && (
+                  <p className="text-red-400 text-xs mt-1 font-orbitron">
+                    {formErrors.email}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-orbitron font-semibold text-neon-blue mb-2">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formValues.password}
+                    onChange={handleChange}
+
+                    className="w-full p-3 rounded-lg bg-slate-800/50 border border-neon-blue/40 text-white font-orbitron placeholder-gray-400 focus:border-neon-pink focus:outline-none focus:ring-2 focus:ring-neon-pink/20"
+                    placeholder="Create a password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-400 hover:text-neon-blue transition-colors"
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
+                {formErrors.password && (
+                  <p className="text-red-400 text-xs mt-1 font-orbitron">
+                    {formErrors.password}
+                  </p>
+                )}
+              </div>
+
               <button
                 type="submit"
-                className="font-orbitron px-8 py-2 bg-gradient-to-r from-neon-orange to-neon-yellow text-black font-bold rounded-full shadow-[0_0_16px_#ffe066] hover:from-neon-yellow hover:to-neon-orange hover:text-white hover:shadow-[0_0_32px_#ffe066] transition-colors flex items-center gap-1"
                 disabled={state.loading}
+                className="w-full py-3 cursor-pointer bg-gradient-to-r from-neon-blue to-neon-pink rounded-lg font-orbitron font-semibold text-white shadow-[0_0_16px_#00fff7] hover:shadow-[0_0_24px_#00fff7] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {state.loading ? (
-                  <Loader2 className="animate-spin" size={20} />
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="animate-spin w-5 h-5 mr-2" />
+                    Creating account...
+                  </div>
                 ) : (
-                  ""
+                  "Sign Up"
                 )}
-                Sign up
               </button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <p className="text-gray-400 font-orbitron">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="text-neon-pink hover:text-neon-yellow transition-colors font-semibold"
+                >
+                  Log in
+                </Link>
+              </p>
             </div>
-          </form>
-          <p className="flex flex-row justify-center gap-1 mt-4 text-sm text-center pt-2 text-neon-orange font-medium">
-            Already have an account?{" "}
-            <a
-              onClick={() => navigate("/login")}
-              className="text-neon-yellow hover:text-neon-orange transition-colors underline font-semibold cursor-pointer"
-            >
-              Log in
-            </a>
-          </p>
+          </div>
         </div>
-      </main>
+      </div>
+
       <Footer />
-    </div>
     </BackgroundLoader>
   );
 }

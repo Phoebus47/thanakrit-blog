@@ -9,8 +9,8 @@ function ProtectedRoute({
   requiredRole,
   children,
 }) {
+  // แสดง loading ขณะตรวจสอบ authentication
   if (isLoading === null || isLoading) {
-    // Loading state or no data yet
     return (
       <div className="flex flex-col min-h-screen">
         <div className="min-h-screen md:p-8">
@@ -20,12 +20,17 @@ function ProtectedRoute({
     );
   }
 
-  if (!isAuthenticated || userRole !== requiredRole) {
-    // Return null while navigate performs the redirection
+  // ถ้าไม่ได้ login ให้ไป login page
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // User is authenticated and has the correct role
+  // ถ้า login แล้วแต่ role ไม่ตรง (ถ้าต้องการตรวจสอบ role)
+  if (requiredRole && userRole !== requiredRole) {
+    return <Navigate to="/" replace />;
+  }
+
+  // ถ้าผ่านการตรวจสอบทั้งหมด ให้แสดงหน้าเป้าหมาย
   return children;
 }
 

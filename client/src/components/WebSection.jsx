@@ -1,21 +1,48 @@
 import React, { useState, useEffect } from "react";
 import { MenuRounded, LinkedIn, GitHub, Google } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
+import { Loader2, User, Settings, LogOut, Bell, Search } from "lucide-react";
+import { useAuth } from "../contexts/authentication";
 
-//Navbar
 export const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const navigate = useNavigate?.() ?? (() => {});
+
+  const { isAuthenticated, state, logout } = useAuth();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  return (
-    <div className="w-full bg-slate-950/70 border-b border-neon-blue shadow-[0_0_24px_2px_#00fff7] z-50 mb-8 backdrop-blur-md">
+  const handleLogout = async () => {
+    await logout();
+    setIsMenuOpen(false);
+    setIsProfileMenuOpen(false);
+  };
+
+  // ฟังก์ชันสำหรับแปลงชื่อเป็น "Firstname L."
+  const formatDisplayName = (fullName) => {
+    if (!fullName) return "User";
+
+    const nameParts = fullName.trim().split(" ");
+    if (nameParts.length === 1) {
+      return nameParts[0]; // ถ้ามีแค่ชื่อเดียว
+    }
+
+    const firstName = nameParts[0];
+    const lastName = nameParts[nameParts.length - 1];
+    const lastNameInitial = lastName.charAt(0).toUpperCase();
+
+    return `${firstName} ${lastNameInitial}.`;
+  };
+
+  // Guest Navbar (อันเดิม)
+  const GuestNavbar = () => (
+    <div className="w-full bg-slate-950/70 border-b border-neon-blue shadow-[0_0_24px_2px_#00fff7] z-50 backdrop-blur-md">
       <nav className="flex justify-between items-center p-6">
         {/* Logo */}
-        <div>
+        <div className="px-2 lg:px-6 py-1">
           <h1
-            className="text-xl sm:text-2xl md:text-3xl lg:text-4xl md:whitespace-break-spaces text-left font-orbitron font-extrabold bg-gradient-to-r from-neon-pink via-pink-500 to-fuchsia-400 bg-clip-text text-transparent drop-shadow-[0_0_18px_#ff3ec9] animate-glow cursor-pointer select-none"
+            className="text-2xl md:text-3xl lg:text-4xl md:whitespace-break-spaces text-left font-orbitron font-extrabold bg-gradient-to-r from-neon-pink via-pink-500 to-fuchsia-400 bg-clip-text text-transparent drop-shadow-[0_0_18px_#ff3ec9] animate-glow cursor-pointer select-none"
             style={{
               WebkitTextStroke: "1.5px #fff",
               letterSpacing: "0.06em",
@@ -24,19 +51,19 @@ export const NavBar = () => {
             }}
             onClick={() => navigate("/")}
           >
-            Thanakrit CodeSpace .
+            CodeSpace .
           </h1>
         </div>
         {/* Hamburger */}
         <button
-          className="md:hidden text-neon-blue hover:text-neon-yellow transition duration-300"
+          className="lg:hidden text-neon-blue hover:text-neon-yellow rounded-lg hover:bg-slate-800/50 transition duration-300 p-2"
           onClick={toggleMenu}
           aria-label="Toggle menu"
         >
           <MenuRounded
             fontSize="large"
             style={{
-              color: "#ff3ec9", // สีหลัก neon-pink
+              color: "#ff3ec9",
               filter: `
                       drop-shadow(0 0 18px #ff3ec9) 
                       drop-shadow(0 0 32px #ffb3fa) 
@@ -51,48 +78,462 @@ export const NavBar = () => {
           />
         </button>
         {/* Desktop Menu */}
-        <div className="hidden md:flex gap-5">
-          <button
-            className="px-8 py-2 rounded-full bg-gradient-to-r from-orange-400 via-yellow-400 to-yellow-300 text-white font-orbitron font-semibold shadow-[0_0_8px_#ffe066] border border-orange-300/60 hover:from-yellow-400 hover:to-orange-400 hover:shadow-[0_0_16px_#ffe066] hover:text-black transition-all duration-300"
-            onClick={() => navigate("/login")}
-          >
-            Log in
-          </button>
-          <button
-            className="px-8 py-2 rounded-full bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-300 text-white font-orbitron font-semibold shadow-[0_0_8px_#ffe066] border border-yellow-300/60 hover:from-orange-400 hover:to-yellow-400 hover:shadow-[0_0_16px_#ffe066] hover:text-black transition-all duration-300"
-            onClick={() => navigate("/sign-up")}
-          >
-            Sign up
-          </button>
-        </div>
-      </nav>
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden animate-fade-in-down bg-slate-950/95 border-t border-neon-blue shadow-[0_0_24px_2px_#00fff7] backdrop-blur-md">
-          <div className="flex flex-col gap-4 p-6 pt-6 bg-gradient-to-b from-slate-900/80 via-fuchsia-900/40 to-blue-900/30">
+        <div className="hidden lg:flex gap-2">
+          <div className="rounded-lg hover:bg-slate-800/50 transition-colors duration-100">
             <button
-              className="w-full px-6 py-4 rounded-full bg-gradient-to-r from-orange-400 via-yellow-400 to-yellow-300 text-white font-orbitron font-semibold shadow-[0_0_8px_#ffe066] border border-orange-300/60 hover:from-yellow-400 hover:to-orange-400 hover:shadow-[0_0_16px_#ffe066] hover:text-black transition-all duration-300"
-              onClick={() => {
-                setIsMenuOpen(false);
-                navigate("/login");
+              className="px-6 py-3 font-orbitron font-semibold cursor-pointer bg-gradient-to-r from-neon-yellow via-neon-orange to-neon-pink bg-clip-text text-transparent hover:from-neon-orange hover:via-neon-yellow hover:to-neon-pink transition-all duration-300 uppercase tracking-widest"
+              style={{
+                WebkitTextStroke: "0.5px #fff",
+                letterSpacing: "0.08em",
+                textShadow: "0 0 8px #ffe066, 0 0 16px #ff8800",
               }}
+              onClick={() => navigate("/login")}
             >
               Log in
             </button>
+          </div>
+          <div className="rounded-lg hover:bg-slate-800/50 transition-colors duration-100">
             <button
-              className="w-full px-6 py-4 rounded-full bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-300 text-white font-orbitron font-semibold shadow-[0_0_8px_#ffe066] border border-yellow-300/60 hover:from-orange-400 hover:to-yellow-400 hover:shadow-[0_0_16px_#ffe066] hover:text-black transition-all duration-300"
-              onClick={() => {
-                setIsMenuOpen(false);
-                navigate("/sign-up");
+              className="px-6 py-3 font-orbitron font-semibold cursor-pointer bg-gradient-to-r from-neon-yellow via-neon-orange to-neon-pink bg-clip-text text-transparent hover:from-neon-orange hover:via-neon-yellow hover:to-neon-pink transition-all duration-300 uppercase tracking-widest"
+              style={{
+                WebkitTextStroke: "0.5px #fff",
+                letterSpacing: "0.08em",
+                textShadow: "0 0 8px #ffe066, 0 0 16px #ff8800",
               }}
+              onClick={() => navigate("/sign-up")}
             >
               Sign up
             </button>
           </div>
         </div>
+      </nav>
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="lg:hidden animate-fade-in-down bg-slate-950/95 border-t border-neon-blue shadow-[0_0_24px_2px_#00fff7] backdrop-blur-md">
+          <div className="flex flex-col gap-4 p-6 pt-6 bg-gradient-to-b from-slate-900/80 via-fuchsia-900/40 to-blue-900/30">
+            <div className="rounded-lg hover:bg-slate-800/50 transition-colors duration-100">
+              <button
+                className="w-full py-3 font-orbitron font-semibold cursor-pointer bg-gradient-to-r from-neon-yellow via-neon-orange to-neon-pink bg-clip-text text-transparent hover:from-neon-orange hover:via-neon-yellow hover:to-neon-pink transition-all duration-300 uppercase tracking-widest"
+                style={{
+                  WebkitTextStroke: "0.5px #fff",
+                  letterSpacing: "0.08em",
+                  textShadow: "0 0 8px #ffe066, 0 0 16px #ff8800",
+                }}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  navigate("/login");
+                }}
+              >
+                Log in
+              </button>
+            </div>
+            <div className="rounded-lg hover:bg-slate-800/50 transition-colors duration-100">
+              <button
+                className="w-full py-3 font-orbitron font-semibold cursor-pointer bg-gradient-to-r from-neon-yellow via-neon-orange to-neon-pink bg-clip-text text-transparent hover:from-neon-orange hover:via-neon-yellow hover:to-neon-pink transition-all duration-300 uppercase tracking-widest"
+                style={{
+                  WebkitTextStroke: "0.5px #fff",
+                  letterSpacing: "0.08em",
+                  textShadow: "0 0 8px #ffe066, 0 0 16px #ff8800",
+                }}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  navigate("/sign-up");
+                }}
+              >
+                Sign up
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
+
+  // User Navbar (หลัง Login)
+  const UserNavbar = () => (
+    <div className="w-full bg-slate-950/70 border-b border-neon-blue shadow-[0_0_24px_2px_#00fff7] z-50 mb-8 backdrop-blur-md">
+      <nav className="flex justify-between items-center py-6 px-10">
+        {/* Logo */}
+        <div className="px-2 lg:px-6 py-1">
+          <h1
+            className="text-2xl md:text-3xl lg:text-4xl whitespace-nowrap text-left font-orbitron font-extrabold bg-gradient-to-r from-neon-pink via-pink-500 to-fuchsia-400 bg-clip-text text-transparent drop-shadow-[0_0_18px_#ff3ec9] animate-glow cursor-pointer select-none"
+            style={{
+              WebkitTextStroke: "1.5px #fff",
+              letterSpacing: "0.06em",
+              textShadow:
+                "0 0 18px #ff3ec9, 0 0 32px #ffb3fa, 0 0 8px #ff3ec9, 0 0 2px #fff",
+            }}
+            onClick={() => navigate("/")}
+          >
+            CodeSpace .
+          </h1>
+        </div>
+
+        {/* Desktop Menu for Logged User */}
+        <div className="hidden lg:flex items-center gap-3">
+          {/* Navigation Links - เฉพาะ 3 ปุ่มนี้ใช้สี author.role */}
+          <div className="flex gap-2">
+            <div className="rounded-lg hover:bg-slate-800/50 transition-colors duration-100">
+              <button
+                className="p-3 font-orbitron font-semibold cursor-pointer bg-gradient-to-r from-neon-yellow via-neon-orange to-neon-pink bg-clip-text text-transparent hover:from-neon-orange hover:via-neon-yellow hover:to-neon-pink transition-all duration-300 uppercase tracking-widest"
+                style={{
+                  WebkitTextStroke: "0.5px #fff",
+                  letterSpacing: "0.08em",
+                  textShadow: "0 0 8px #ffe066, 0 0 16px #ff8800",
+                }}
+                onClick={() => navigate("/dashboard")}
+              >
+                Dashboard
+              </button>
+            </div>
+            <div className="rounded-lg hover:bg-slate-800/50 transition-colors duration-100">
+              <button
+                className="p-3 font-orbitron font-semibold cursor-pointer bg-gradient-to-r from-neon-yellow via-neon-orange to-neon-pink bg-clip-text text-transparent hover:from-neon-orange hover:via-neon-yellow hover:to-neon-pink transition-all duration-300 uppercase tracking-widest"
+                style={{
+                  WebkitTextStroke: "0.5px #fff",
+                  letterSpacing: "0.08em",
+                  textShadow: "0 0 8px #ffe066, 0 0 16px #ff8800",
+                }}
+                onClick={() => navigate("/my-posts")}
+              >
+                My Posts
+              </button>
+            </div>
+            <div className="rounded-lg hover:bg-slate-800/50 transition-colors duration-100">
+              <button
+                className="p-3 font-orbitron font-semibold cursor-pointer bg-gradient-to-r from-neon-yellow via-neon-orange to-neon-pink bg-clip-text text-transparent hover:from-neon-orange hover:via-neon-yellow hover:to-neon-pink transition-all duration-300 uppercase tracking-widest"
+                style={{
+                  WebkitTextStroke: "0.5px #fff",
+                  letterSpacing: "0.08em",
+                  textShadow: "0 0 8px #ffe066, 0 0 16px #ff8800",
+                }}
+                onClick={() => navigate("/create-post")}
+              >
+                Create Post
+              </button>
+            </div>
+          </div>
+
+          {/* User Actions - กลับเป็นสีเดิม */}
+          <div className="flex items-center gap-2">
+            {/* Search */}
+            <button className="p-2 text-neon-blue hover:text-neon-pink cursor-pointer transition-colors rounded-lg hover:bg-slate-800/50">
+              <Search className="w-6 h-6" />
+            </button>
+
+            {/* Notifications */}
+            <button className="p-2 text-neon-blue hover:text-neon-pink transition-colors cursor-pointer relative rounded-lg hover:bg-slate-800/50">
+              <Bell className="w-6 h-6" />
+              <span className="absolute top-0 right-0 w-2 h-2 bg-neon-pink rounded-full shadow-[0_0_8px_#ff3ec9]"></span>
+            </button>
+
+            {/* Profile Dropdown - แก้ไข field ของรูปภาพ */}
+            <div className="relative">
+              <button
+                className="group flex items-center gap-2 px-2 cursor-pointer rounded-lg hover:bg-slate-800/50 transition-colors duration-100"
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+              >
+                {state.user?.profile_pic ? (
+                  <img
+                    src={state.user.profile_pic}
+                    alt="Profile"
+                    className="w-12 h-12 flex-shrink-0 rounded-full border-2 border-neon-blue group-hover:border-neon-pink shadow-[0_0_8px_#00fff7] group-hover:shadow-[0_0_8px_#ff3ec9] object-cover transition-all duration-300"
+                  />
+                ) : (
+                  <div className="w-12 h-12 flex-shrink-0 rounded-full border-2 border-neon-blue group-hover:border-neon-pink shadow-[0_0_8px_#00fff7] group-hover:shadow-[0_0_8px_#ff3ec9] bg-slate-800/50 flex items-center justify-center transition-all duration-300">
+                    <User className="w-6 h-6 text-neon-blue group-hover:text-neon-pink transition-colors duration-300" />
+                  </div>
+                )}
+                <span
+                  className="font-orbitron whitespace-nowrap font-semibold bg-gradient-to-r from-neon-yellow via-neon-orange to-neon-pink bg-clip-text text-transparent"
+                  style={{
+                    WebkitTextStroke: "0.5px #fff",
+                    textShadow: "0 0 8px #ffe066",
+                  }}
+                >
+                  {formatDisplayName(state.user?.name)}{" "}
+                </span>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 10 6"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M9 1L5 5L1 1"
+                    stroke="#00f0ff"
+                    className="group-hover:stroke-neon-pink transition-colors duration-300"
+                  />
+                </svg>
+              </button>
+
+              {/* Profile dropdown */}
+              {isProfileMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-slate-950/95 border border-neon-blue/40 rounded-lg shadow-[0_0_24px_#00fff7] backdrop-blur-md">
+                  <div className="px-2 py-2 gap-2 flex flex-col">
+                    <div className="rounded-lg hover:bg-slate-800/50 transition-colors duration-100">
+                      <button
+                        onClick={() => {
+                          navigate("/profile");
+                          setIsProfileMenuOpen(false);
+                        }}
+                        className="w-full py-3 px-4 font-orbitron font-semibold cursor-pointer text-transparent hover:from-neon-orange hover:via-neon-yellow hover:to-neon-pink transition-all duration-300 uppercase tracking-widest"
+                        style={{
+                          background:
+                            "linear-gradient(to right, #ffe066, #ff8800, #ff3ec9)",
+                          WebkitBackgroundClip: "text",
+                          WebkitTextStroke: "0.5px #fff",
+                          letterSpacing: "0.08em",
+                          textShadow: "0 0 8px #ffe066, 0 0 16px #ff8800",
+                        }}
+                      >
+                        <div className="flex items-center justify-start gap-2">
+                          <User
+                            className="w-6 h-6 text-neon-yellow"
+                            style={{ textShadow: "0 0 8px #ffe066" }}
+                          />
+                          <span>Profile</span>
+                        </div>
+                      </button>
+                    </div>
+
+                    <div className="rounded-lg hover:bg-slate-800/50 transition-colors duration-100">
+                      <button
+                        onClick={() => {
+                          navigate("/settings");
+                          setIsProfileMenuOpen(false);
+                        }}
+                        className="w-full py-3 px-4 font-orbitron font-semibold cursor-pointer text-transparent hover:from-neon-orange hover:via-neon-yellow hover:to-neon-pink transition-all duration-300 uppercase tracking-widest"
+                        style={{
+                          background:
+                            "linear-gradient(to right, #ffe066, #ff8800, #ff3ec9)",
+                          WebkitBackgroundClip: "text",
+                          WebkitTextStroke: "0.5px #fff",
+                          letterSpacing: "0.08em",
+                          textShadow: "0 0 8px #ffe066, 0 0 16px #ff8800",
+                        }}
+                      >
+                        <div className="flex items-center justify-start gap-2">
+                          <Settings
+                            className="w-6 h-6 text-neon-yellow"
+                            style={{ textShadow: "0 0 8px #ffe066" }}
+                          />
+                          <span>Settings</span>
+                        </div>
+                      </button>
+                    </div>
+
+                    <div className="pt-2 border-t border-orange-300/20">
+                      <div className="rounded-lg hover:bg-slate-800/50 transition-colors duration-100">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full py-3 px-4 font-orbitron font-semibold cursor-pointer text-transparent transition-all duration-300 uppercase tracking-widest"
+                          style={{
+                            background:
+                              "linear-gradient(to right, #ef4444, #f87171, #ff8800)",
+                            WebkitBackgroundClip: "text",
+                            WebkitTextStroke: "0.5px #fff",
+                            letterSpacing: "0.08em",
+                            textShadow: "0 0 8px #ff4444, 0 0 16px #ff8800",
+                          }}
+                        >
+                          <div className="flex items-center justify-start gap-2">
+                            <LogOut
+                              className="w-6 h-6 text-red-400"
+                              style={{ textShadow: "0 0 8px #ff4444" }}
+                            />
+                            <span>Logout</span>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Hamburger */}
+        <button
+          className="lg:hidden text-neon-blue hover:text-neon-yellow rounded-lg hover:bg-slate-800/50 transition duration-300 p-2"
+          onClick={toggleMenu}
+          aria-label="Toggle menu"
+        >
+          <MenuRounded
+            fontSize="large"
+            style={{
+              color: "#ff3ec9",
+              filter: `
+                      drop-shadow(0 0 18px #ff3ec9) 
+                      drop-shadow(0 0 32px #ffb3fa) 
+                      drop-shadow(0 0 8px #ff3ec9) 
+                      drop-shadow(0 0 2px #fff)
+                    `,
+              stroke: "#fff",
+              strokeWidth: "1px",
+              letterSpacing: "0.06em",
+            }}
+            className="animate-glow cursor-pointer"
+          />
+        </button>
+      </nav>
+
+      {/* Mobile Menu for Logged User */}
+      {isMenuOpen && (
+        <div className="lg:hidden animate-fade-in-down bg-slate-950/95 border-t border-neon-blue shadow-[0_0_24px_2px_#00fff7] backdrop-blur-md">
+          <div className="flex flex-col gap-4 p-6 pt-6 bg-gradient-to-b from-slate-900/80 via-fuchsia-900/40 to-blue-900/30 hover:bg-slate-950/80">
+            {/* User info in mobile */}
+            <div className="flex items-center space-x-3 pb-4 border-b border-neon-pink/20">
+              {state.user?.profile_pic ? (
+                <img
+                  src={state.user.profile_pic}
+                  alt="Profile"
+                  className="w-12 h-12 flex-shrink-0 rounded-full border-2 border-neon-blue shadow-[0_0_8px_#00fff7] object-cover"
+                />
+              ) : (
+                <div className="w-12 h-12 flex-shrink-0 rounded-full border-2 border-neon-blue shadow-[0_0_8px_#00fff7] bg-slate-800/50 flex items-center justify-center">
+                  <User className="w-8 h-8 text-neon-blue" />
+                </div>
+              )}
+              <div>
+                <div
+                  className="font-orbitron whitespace-nowrap font-semibold bg-gradient-to-r from-neon-yellow via-neon-orange to-neon-pink bg-clip-text text-transparent"
+                  style={{
+                    WebkitTextStroke: "0.5px #fff",
+                    textShadow: "0 0 8px #ffe066",
+                  }}
+                >
+                  {formatDisplayName(state.user?.name)}
+                </div>
+                <div className="text-neon-blue/70 text-sm font-orbitron">
+                  {state.user?.role || "User"}
+                </div>
+              </div>
+            </div>
+
+            {/* Main navigation buttons - ใช้ div ครอบ */}
+            <div className="rounded-lg hover:bg-slate-800/50 transition-colors duration-100">
+              <button
+                className="w-full py-3 font-orbitron font-semibold cursor-pointer bg-gradient-to-r from-neon-yellow via-neon-orange to-neon-pink bg-clip-text text-transparent hover:from-neon-orange hover:via-neon-yellow hover:to-neon-pink transition-all duration-300 uppercase tracking-widest"
+                style={{
+                  WebkitTextStroke: "0.5px #fff",
+                  letterSpacing: "0.08em",
+                  textShadow: "0 0 8px #ffe066, 0 0 16px #ff8800",
+                }}
+                onClick={() => {
+                  navigate("/dashboard");
+                  setIsMenuOpen(false);
+                }}
+              >
+                Dashboard
+              </button>
+            </div>
+
+            <div className="rounded-lg hover:bg-slate-800/50 transition-colors duration-100">
+              <button
+                className="w-full py-3 font-orbitron font-semibold cursor-pointer bg-gradient-to-r from-neon-yellow via-neon-orange to-neon-pink bg-clip-text text-transparent hover:from-neon-orange hover:via-neon-yellow hover:to-neon-pink transition-all duration-300 uppercase tracking-widest"
+                style={{
+                  WebkitTextStroke: "0.5px #fff",
+                  letterSpacing: "0.08em",
+                  textShadow: "0 0 8px #ffe066, 0 0 16px #ff8800",
+                }}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  navigate("/my-posts");
+                }}
+              >
+                My Posts
+              </button>
+            </div>
+
+            <div className="rounded-lg hover:bg-slate-800/50 transition-colors duration-100">
+              <button
+                className="w-full py-3 font-orbitron font-semibold cursor-pointer bg-gradient-to-r from-neon-yellow via-neon-orange to-neon-pink bg-clip-text text-transparent hover:from-neon-orange hover:via-neon-yellow hover:to-neon-pink transition-all duration-300 uppercase tracking-widest"
+                style={{
+                  WebkitTextStroke: "0.5px #fff",
+                  letterSpacing: "0.08em",
+                  textShadow: "0 0 8px #ffe066, 0 0 16px #ff8800",
+                }}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  navigate("/create-post");
+                }}
+              >
+                Create Post
+              </button>
+            </div>
+
+            {/* Profile & Settings buttons - ใช้ div ครอบ */}
+            <div className="rounded-lg hover:bg-slate-800/50 transition-colors duration-100">
+              <button
+                className="w-full py-3 font-orbitron font-semibold cursor-pointer bg-gradient-to-r from-neon-yellow via-neon-orange to-neon-pink bg-clip-text text-transparent hover:from-neon-orange hover:via-neon-yellow hover:to-neon-pink transition-all duration-300 uppercase tracking-widest"
+                style={{
+                  WebkitTextStroke: "0.5px #fff",
+                  letterSpacing: "0.08em",
+                  textShadow: "0 0 8px #ffe066, 0 0 16px #ff8800",
+                }}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  navigate("/profile");
+                }}
+              >
+                Profile
+              </button>
+            </div>
+
+            <div className="rounded-lg hover:bg-slate-800/50 transition-colors duration-100">
+              <button
+                className="w-full py-3 font-orbitron font-semibold cursor-pointer bg-gradient-to-r from-neon-yellow via-neon-orange to-neon-pink bg-clip-text text-transparent hover:from-neon-orange hover:via-neon-yellow hover:to-neon-pink transition-all duration-300 uppercase tracking-widest"
+                style={{
+                  WebkitTextStroke: "0.5px #fff",
+                  letterSpacing: "0.08em",
+                  textShadow: "0 0 8px #ffe066, 0 0 16px #ff8800",
+                }}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  navigate("/settings");
+                }}
+              >
+                Settings
+              </button>
+            </div>
+
+            <div className="pt-4 border-t border-neon-orange/20">
+              <div className="rounded-lg hover:bg-slate-800/50 transition-colors duration-100">
+                <button
+                  onClick={handleLogout}
+                  className="w-full py-3 font-orbitron font-semibold cursor-pointer bg-gradient-to-r from-red-500 via-red-400 to-neon-orange bg-clip-text text-transparent hover:from-red-700 hover:via-red-600 hover:to-neon-orange transition-all duration-300 uppercase tracking-widest"
+                  style={{
+                    WebkitTextStroke: "0.5px #fff",
+                    letterSpacing: "0.08em",
+                    textShadow: "0 0 8px #ff4444, 0 0 16px #ff8800",
+                  }}
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  // แสดง loading state
+  if (state.getUserLoading) {
+    return (
+      <div className="w-full bg-slate-950/70 border-b border-neon-blue shadow-[0_0_24px_2px_#00fff7] z-50 mb-8 backdrop-blur-md">
+        <div className="flex justify-center items-center p-6">
+          <Loader2 className="animate-spin w-6 h-6 text-neon-blue" />
+        </div>
+      </div>
+    );
+  }
+
+  // Return ตาม authentication status
+  return <>{isAuthenticated ? <UserNavbar /> : <GuestNavbar />}</>;
 };
 
 //Hero

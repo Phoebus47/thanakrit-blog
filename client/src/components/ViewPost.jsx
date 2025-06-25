@@ -93,7 +93,7 @@ export function ViewPost({ onLoadingChange }) {
     <div className="max-w-7xl mx-auto space-y-8 container md:px-8 pb-20 md:pb-28 md:pt-8 lg:pt-16">
       <div className="space-y-4 px-4">
         <img
-          src={img || "https://via.placeholder.com/800x400"}
+          src={img || "https://placehold.co/800x400"}
           alt={title}
           className="rounded-lg object-cover w-full h-[260px] sm:h-[340px] md:h-[587px] mb-6"
         />

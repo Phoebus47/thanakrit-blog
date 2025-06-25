@@ -1,34 +1,60 @@
-import { NavBar, Footer } from "@/components/WebSection";
+import { NavBar, Footer } from "../components/WebSection";
 import { Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { BackgroundLoader } from "@/components/BackgroundLoader";
+import { BackgroundLoader } from "../components/BackgroundLoader";
 
 export default function SignUpSuccessPage() {
   const navigate = useNavigate();
+  
   return (
     <BackgroundLoader imageUrl="/images/bg.webp">
-    <div className="flex flex-col min-h-screen">
       <NavBar />
-      <main className="flex-grow flex items-center justify-center p-4 my-4">
-        <div className="flex flex-col space-y-8 items-center w-full max-w-xl bg-slate-950/80 border border-neon-orange shadow-neon-orange rounded-lg px-3 sm:px-20 py-14">
-          <div className="relative">
-            <div className="h-20 w-20 bg-gradient-to-br from-neon-green via-neon-yellow to-neon-orange rounded-full flex items-center justify-center shadow-[0_0_24px_#00ff00]">
-              <Check className="h-12 w-12 text-white drop-shadow-[0_0_8px_#00ff00]" strokeWidth={3} />
+      
+      <div className="min-h-screen flex items-center justify-center px-4 py-20">
+        <div className="w-full max-w-md">
+          <div className="bg-slate-950/80 backdrop-blur-md border border-neon-blue/40 rounded-2xl p-8 shadow-[0_0_24px_#00fff7]">
+            {/* Success Icon */}
+            <div className="flex justify-center mb-8">
+              <div className="h-20 w-20 bg-gradient-to-br from-neon-green via-neon-blue to-neon-pink rounded-full flex items-center justify-center shadow-[0_0_24px_#00fff7]">
+                <Check className="h-12 w-12 text-white drop-shadow-[0_0_8px_#00fff7]" strokeWidth={3} />
+              </div>
+            </div>
+
+            {/* Title */}
+            <h1 className="text-3xl font-orbitron font-bold text-center mb-6 bg-gradient-to-r from-neon-pink via-neon-blue to-neon-green bg-clip-text text-transparent">
+              Registration Successful!
+            </h1>
+
+            {/* Description */}
+            <p className="text-center text-gray-400 font-orbitron mb-8">
+              Your account has been created successfully. You can now log in with your credentials.
+            </p>
+
+            {/* Continue Button */}
+            <button
+              onClick={() => navigate("/login")}
+              className="w-full py-3 bg-gradient-to-r from-neon-blue to-neon-pink rounded-lg cursor-pointer font-orbitron font-semibold text-white shadow-[0_0_16px_#00fff7] hover:shadow-[0_0_24px_#00fff7] transition-all duration-300"
+            >
+              Continue to Login
+            </button>
+
+            {/* Additional Link */}
+            <div className="mt-6 text-center">
+              <p className="text-gray-400 font-orbitron">
+                Want to explore first?{" "}
+                <button
+                  onClick={() => navigate("/")}
+                  className="text-neon-pink hover:text-neon-yellow transition-colors cursor-pointer font-semibold"
+                >
+                  Go to Home
+                </button>
+              </p>
             </div>
           </div>
-          <h1 className="mt-6 text-3xl font-orbitron font-bold text-neon-yellow txt-shadow-neon-orange text-center">
-            Registration Successful
-          </h1>
-          <button
-            onClick={() => navigate("/login")}
-            className="px-8 py-3 bg-gradient-to-r from-neon-orange to-neon-yellow text-black font-bold rounded-full shadow-[0_0_16px_#ffe066] hover:from-neon-yellow hover:to-neon-orange hover:text-white hover:shadow-[0_0_32px_#ffe066] transition-colors"
-          >
-            Continue
-          </button>
         </div>
-      </main>
+      </div>
+
       <Footer />
-    </div>
     </BackgroundLoader>
   );
 }
