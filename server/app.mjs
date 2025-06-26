@@ -44,6 +44,15 @@ app.use("/likes", likeRoutes);
 app.use("/users", userRoutes);
 app.use("/upload", uploadRoutes);
 
+// Handle 404 for API routes
+app.use((req, res, next) => {
+  res.status(404).json({
+    message: "Route not found",
+    path: req.path,
+    method: req.method,
+  });
+});
+
 // Error handling
 app.use((error, req, res, next) => {
   console.error("Server Error:", error);
@@ -64,4 +73,3 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 export default app;
- 
