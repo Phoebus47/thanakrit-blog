@@ -2,13 +2,13 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
-  "main": "server.mjs",
+  "main": "src/app.mjs",
   "type": "module",
   "scripts": {
     "dev": "nodemon src/app.mjs",
     "start": "node src/app.mjs",
-    "build": "prisma generate",
-    "postinstall": "prisma generate",
+    "build": "npx prisma generate",
+    "postinstall": "npx prisma generate",
     "generate": "npx prisma generate",
     "db:pull": "npx prisma db pull"
   },
@@ -22,10 +22,10 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^2.0.1"
+    "multer": "^2.0.1",
+    "prisma": "^6.10.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10",
-    "prisma": "^6.10.1"
+    "nodemon": "^3.1.10"
   }
 }

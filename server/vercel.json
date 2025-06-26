@@ -2,18 +2,10 @@
   "version": 2,
   "builds": [
     {
-      "src": "vercel-build.mjs",
-      "use": "@vercel/node"
-    },
-    {
       "src": "src/app.mjs",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": [
-          "prisma/**",
-          "node_modules/.prisma/**",
-          "node_modules/@prisma/client/**"
-        ]
+        "runtime": "nodejs20.x"
       }
     }
   ],

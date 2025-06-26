@@ -1,7 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable react/prop-types */
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 
 const AuthContext = React.createContext();
 
@@ -13,7 +12,6 @@ function AuthProvider(props) {
     user: null,
   });
 
-  const navigate = useNavigate();
 
   // Fetch user details using Backend API
   const fetchUser = async () => {
@@ -90,7 +88,6 @@ function AuthProvider(props) {
       localStorage.setItem('authToken', responseData.token);
 
       setState((prevState) => ({ ...prevState, loading: false, error: null }));
-      navigate("/");
       await fetchUser();
     } catch (error) {
       setState((prevState) => ({
@@ -127,7 +124,6 @@ function AuthProvider(props) {
       }
 
       setState((prevState) => ({ ...prevState, loading: false, error: null }));
-      navigate("/sign-up/success");
     } catch (error) {
       setState((prevState) => ({
         ...prevState,
@@ -142,7 +138,6 @@ function AuthProvider(props) {
   const logout = async () => {
     localStorage.removeItem('authToken');
     setState({ user: null, error: null, loading: null });
-    navigate("/");
   };
 
   const isAuthenticated = Boolean(state.user);
