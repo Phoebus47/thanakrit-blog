@@ -10,10 +10,10 @@ import {
 import { SmilePlus, Copy, Loader2, X } from "lucide-react";
 import { FacebookIcon, LinkedinIcon, TwitterIcon } from "react-share";
 import { Textarea } from "@/components/ui/textarea";
-import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@contexts/authentication";
+import remarkGfm from "remark-gfm";
 
 export function ViewPost({ onLoadingChange }) {
   const [img, setImg] = useState("");
@@ -35,31 +35,46 @@ export function ViewPost({ onLoadingChange }) {
   useEffect(() => {
     if (onLoadingChange) onLoadingChange(true);
     getPost();
-    // eslint-disable-next-line
   }, []);
 
   const getPost = async () => {
     if (onLoadingChange) onLoadingChange(true);
     try {
-      const postsResponse = await axios.get(
-        `https://blog-post-project-api-with-db.vercel.app/posts/${param.postId}`
-      );
-      if (postsResponse.data) {
-        setImg(postsResponse.data.image || "");
-        setTitle(postsResponse.data.title || "");
-        setDate(postsResponse.data.date || "");
-        setDescription(postsResponse.data.description || "");
-        setCategory(postsResponse.data.category || "");
-        setContent(postsResponse.data.content || "");
+      // Fetch post data from backend API
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/posts/${param.postId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Post not found');
       }
-      const likesResponse = await axios.get(
-        `https://blog-post-project-api-with-db.vercel.app/posts/${param.postId}/likes`
-      );
-      setLikes(likesResponse.data.like_count);
-      const commentsResponse = await axios.get(
-        `https://blog-post-project-api-with-db.vercel.app/posts/${param.postId}/comments`
-      );
-      setComments(commentsResponse.data);
+
+      const postData = await response.json();
+
+      if (postData) {
+        setImg(postData.image || "");
+        setTitle(postData.title || "");
+        setDate(postData.date || "");
+        setDescription(postData.description || "");
+        setCategory(postData.category || "");
+        setContent(postData.content || "");
+        setLikes(postData.likes_count || 0);
+      }
+
+      // Fetch comments from backend API (ต้องสร้าง API endpoint)
+      const commentsResponse = await fetch(`${import.meta.env.VITE_SERVER_URL}/comments/${param.postId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (commentsResponse.ok) {
+        const commentsData = await commentsResponse.json();
+        setComments(commentsData || []);
+      }
+
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching post data:", error);
@@ -76,9 +91,9 @@ export function ViewPost({ onLoadingChange }) {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 container md:px-8 pb-20 md:pb-28 md:pt-8 lg:pt-16">
-      <div className="space-y-4 md:px-4">
+      <div className="space-y-4 px-4">
         <img
-          src={img || "/https://via.placeholder.com/800x400"}
+          src={img || "https://placehold.co/800x400"}
           alt={title}
           className="rounded-lg object-cover w-full h-[260px] sm:h-[340px] md:h-[587px] mb-6"
         />
@@ -101,53 +116,32 @@ export function ViewPost({ onLoadingChange }) {
               </span>
             </div>
 
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-400 via-yellow-400 to-yellow-300 bg-clip-text text-transparent drop-shadow-[0_0_18px_#ffe066] mb-2">
+            <h1 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-orange-400 via-yellow-400 to-yellow-300 bg-clip-text text-transparent drop-shadow-[0_0_18px_#ffe066] mb-2">
               {title}
             </h1>
             <p className="text-yellow-100/90 txt-shadow-neon-orange mb-4">
               {description || "No description available"}
             </p>
             <div className="markdown">
-              <ReactMarkdown
+              <ReactMarkdown 
+                remarkPlugins={[remarkGfm]}
                 components={{
-                  h2: ({ node, ...props }) => (
-                    <h2
-                      className="text-2xl text-neon-yellow txt-shadow-neon-orange mb-2"
-                      {...props}
-                    />
-                  ),
-                  p: ({ node, ...props }) => (
-                    <p
-                      className="text-white txt-shadow-neon-orange mb-4"
-                      {...props}
-                    />
-                  ),
-                  img: ({ node, ...props }) => (
-                    <img
-                      className="w-full rounded-lg shadow-lg my-4"
-                      {...props}
-                    />
-                  ),
-                  a: ({ node, ...props }) => (
-                    <a
-                      className="text-neon-pink underline hover:text-white"
-                      {...props}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    />
-                  ),
-                  ul: ({ node, ...props }) => (
-                    <ul
-                      className="list-disc list-inside text-white mb-4"
-                      {...props}
-                    />
-                  ),
-                  li: ({ node, ...props }) => (
-                    <li className="mb-1" {...props} />
-                  ),
+                  h1: ({node, ...props}) => <h1 className="text-3xl font-bold mb-4 text-neon-yellow txt-shadow-neon-orange" {...props} />,
+                  h2: ({node, ...props}) => <h2 className="text-2xl font-semibold mb-3 text-neon-orange txt-shadow-neon-orange" {...props} />,
+                  h3: ({node, ...props}) => <h3 className="text-xl font-semibold mb-2 text-neon-yellow" {...props} />,
+                  p: ({node, ...props}) => <p className="mb-4 text-white" {...props} />,
+                  a: ({node, ...props}) => <a className="text-neon-blue hover:text-neon-yellow underline" {...props} />,
+                  ul: ({node, ...props}) => <ul className="list-disc ml-6 mb-4" {...props} />,
+                  ol: ({node, ...props}) => <ol className="list-decimal ml-6 mb-4" {...props} />,
+                  li: ({node, ...props}) => <li className="mb-2" {...props} />,
+                  blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-neon-orange pl-4 italic mb-4" {...props} />,
+                  code: ({node, inline, ...props}) => 
+                    inline ? 
+                      <code className="bg-slate-800 px-2 py-1 rounded text-neon-green" {...props} /> :
+                      <code className="block bg-slate-800 p-4 rounded mb-4 text-neon-green overflow-x-auto" {...props} />
                 }}
               >
-                {content || "No content available"}
+                {content ? content.replace(/\\n/g, '\n').replace(/\\"/g, '"') : "No content available"}
               </ReactMarkdown>
             </div>
           </article>
@@ -185,7 +179,6 @@ export function ViewPost({ onLoadingChange }) {
 }
 
 function Share({ likesAmount, setDialogState, user, setLikes }) {
-  const shareLink = encodeURI(window.location.href);
   const param = useParams();
   const [isLiking, setIsLiking] = useState(false);
 
@@ -196,31 +189,29 @@ function Share({ likesAmount, setDialogState, user, setLikes }) {
 
     setIsLiking(true);
     try {
-      // First try to like the post
-      try {
-        await axios.post(
-          `https://blog-post-project-api.vercel.app/posts/${param.postId}/likes`
-        );
-      } catch (error) {
-        if (error.response?.status === 500) {
-          await axios.delete(
-            `https://blog-post-project-api.vercel.app/posts/${param.postId}/likes`
-          );
-        } else {
-          throw error;
-        }
-      }
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/likes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          post_id: param.postId,
+          user_id: user.id
+        })
+      });
 
-      const likesResponse = await axios.get(
-        `https://blog-post-project-api.vercel.app/posts/${param.postId}/likes`
-      );
-      setLikes(likesResponse.data.like_count);
+      if (response.ok) {
+        const data = await response.json();
+        setLikes(data.count);
+      }
     } catch (error) {
-      console.error("Error handling like/unlike:", error);
+      console.error("Error toggling like:", error);
     } finally {
       setIsLiking(false);
     }
   };
+
+  const shareLink = encodeURI(window.location.href);
 
   return (
     <div className="md:px-4">
@@ -231,20 +222,20 @@ function Share({ likesAmount, setDialogState, user, setLikes }) {
           className={`flex items-center justify-center space-x-2 px-11 py-3 rounded-full font-bold bg-gradient-to-r from-orange-400 via-yellow-400 to-yellow-300 text-slate-900 shadow-[0_0_12px_#ffe066] border border-yellow-200/60 hover:from-yellow-400 hover:to-orange-400 hover:shadow-[0_0_24px_#ffe066] transition-all duration-300 ${
             isLiking
               ? "bg-gray-800 cursor-not-allowed text-gray-500 border-gray-300"
-              : "bg-gradient-to-r from-neon-blue to-neon-purple hover:bg-gradient-to-l hover:from-neon-orange hover:to-neon-blue"
+              : ""
           }`}
         >
-          <SmilePlus className="w-5 h-5 text-white group-hover:text-neon-pink transition-colors" />
-          <span className="text-white group-hover:text-neon-pink font-medium transition-colors">
+          <SmilePlus className="w-5 h-5" />
+          <span className="font-medium">
             {likesAmount}
           </span>
         </button>
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-wrap gap-2 items-center">
           <button
             onClick={() => {
               navigator.clipboard.writeText(shareLink);
               toast.custom((t) => (
-                <div className="bg-green-500 text-white p-4 rounded-sm flex justify-between items-start max-w-md w-full">
+                <div className="bg-neon-green text-white p-4 rounded-sm flex justify-between items-start max-w-md w-full shadow-neon-green">
                   <div>
                     <h2 className="font-bold text-lg mb-1">Copied!</h2>
                     <p className="text-sm">
@@ -260,7 +251,7 @@ function Share({ likesAmount, setDialogState, user, setLikes }) {
                 </div>
               ));
             }}
-            className="bg-gradient-to-r from-neon-orange to-neon-pink flex flex-1 items-center justify-center space-x-2 px-11 py-3 rounded-full text-white border border-neon-pink shadow-[0_0_16px_#ff3ec9] hover:scale-105 hover:shadow-[0_0_32px_#ffe066] transition-all duration-300 group"
+            className="bg-gradient-to-r from-neon-orange to-neon-pink flex flex-1 items-center justify-center space-x-2  px-6 md:px-11 py-3 rounded-full text-white border border-neon-pink shadow-[0_0_16px_#ff3ec9] hover:scale-105 hover:shadow-[0_0_32px_#ffe066] transition-all duration-300 group"
           >
             <Copy className="w-5 h-5 text-slate-900 transition-colors group-hover:text-neon-yellow" />
             <span className="text-slate-900 font-medium transition-colors group-hover:text-neon-yellow">
@@ -295,41 +286,45 @@ function Share({ likesAmount, setDialogState, user, setLikes }) {
 }
 
 function Comment({ setDialogState, commentList, setComments, user }) {
-  const [commentText, setCommentText] = useState("");
+  const [newComment, setNewComment] = useState("");
   const [isError, setIsError] = useState(false);
   const param = useParams();
 
   const handleSendComment = async (e) => {
     e.preventDefault();
-    if (!commentText.trim()) {
+    
+    if (!user) {
+      setDialogState(true);
+      return;
+    }
+
+    if (!newComment.trim()) {
       setIsError(true);
-    } else {
-      setIsError(false);
-      setCommentText("");
-      await axios.post(
-        `https://blog-post-project-api.vercel.app/posts/${param.postId}/comments`,
-        { comment: commentText }
-      );
-      const commentsResponse = await axios.get(
-        `https://blog-post-project-api.vercel.app/posts/${param.postId}/comments`
-      );
-      setComments(commentsResponse.data);
-      toast.custom((t) => (
-        <div className="bg-green-500 text-white p-4 rounded-sm flex justify-between items-start max-w-md w-full">
-          <div>
-            <h2 className="font-bold text-lg mb-1">Comment Posted!</h2>
-            <p className="text-sm">
-              Your comment has been successfully added to this post.
-            </p>
-          </div>
-          <button
-            onClick={() => toast.dismiss(t)}
-            className="text-white hover:text-gray-200"
-          >
-            <X size={20} />
-          </button>
-        </div>
-      ));
+      return;
+    }
+
+    setIsError(false);
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          post_id: param.postId,
+          user_id: user.id,
+          comment_text: newComment
+        })
+      });
+
+      if (response.ok) {
+        const newCommentData = await response.json();
+        setComments([newCommentData, ...commentList]);
+        setNewComment("");
+      }
+    } catch (error) {
+      console.error("Error adding comment:", error);
     }
   };
 
@@ -341,14 +336,14 @@ function Comment({ setDialogState, commentList, setComments, user }) {
         </h3>
         <form className="space-y-2 relative" onSubmit={handleSendComment}>
           <Textarea
-            value={commentText}
+            value={newComment}
             onFocus={() => {
               setIsError(false);
               if (!user) {
                 return setDialogState(true);
               }
             }}
-            onChange={(e) => setCommentText(e.target.value)}
+            onChange={(e) => setNewComment(e.target.value)}
             placeholder="What are your thoughts?"
             className={`w-full p-4 h-24 resize-none py-3 rounded-md placeholder:text-neon-blue bg-slate-900/80 text-white focus-visible:ring-0 focus-visible:ring-offset-0 ${
               isError ? "border-red-500" : "border-pink-400/40"
@@ -378,15 +373,15 @@ function Comment({ setDialogState, commentList, setComments, user }) {
             <div className="flex space-x-4">
               <div className="flex-shrink-0">
                 <img
-                  src={comment.profile_pic}
-                  alt={comment.name}
+                  src={comment.users?.profile_pic || "/images/avartar.webp"}
+                  alt={comment.users?.name || "User"}
                   className="rounded-full w-12 h-12 object-cover border-2 border-neon-blue shadow-[0_0_8px_#00fff7]"
                 />
               </div>
               <div className="flex-grow">
                 <div className="flex flex-col items-start justify-between">
                   <h4 className="font-semibold text-neon-blue txt-shadow-neon-blue">
-                    {comment.name}
+                    {comment.users?.name || "Unknown User"}
                   </h4>
                   <span className="text-sm text-neon-yellow/80">
                     {new Date(comment.created_at)
@@ -454,21 +449,21 @@ function CreateAccountModal({ dialogState, setDialogState }) {
   const navigate = useNavigate();
   return (
     <AlertDialog open={dialogState} onOpenChange={setDialogState}>
-      <AlertDialogContent className="bg-slate-950 text-white rounded-md pt-16 pb-6 max-w-[22rem] sm:max-w-lg flex flex-col items-center">
-        <AlertDialogTitle className="text-3xl font-semibold pb-2 text-center">
+      <AlertDialogContent className="bg-slate-950 text-white rounded-md pt-16 pb-6 max-w-[22rem] sm:max-w-lg flex flex-col items-center border border-neon-orange shadow-neon-orange">
+        <AlertDialogTitle className="text-3xl font-semibold pb-2 text-center text-neon-yellow txt-shadow-neon-orange">
           Create an account to continue
         </AlertDialogTitle>
         <button
-          onClick={() => navigate("/signup")}
-          className="rounded-full text-white bg-gradient-to-r from-neon-blue to-neon-orange hover:bg-gradient-to-l hover:from-neon-orange hover:to-neon-blue transition-colors py-4 text-lg w-52"
+          onClick={() => navigate("/sign-up")}
+          className="rounded-full text-black bg-gradient-to-r from-neon-orange to-neon-yellow hover:from-neon-yellow hover:to-neon-orange hover:text-white transition-colors py-4 text-lg w-52 shadow-[0_0_16px_#ffe066]"
         >
           Create account
         </button>
-        <AlertDialogDescription className="flex flex-row gap-1 justify-center font-medium text-center pt-2 text-muted-foreground">
+        <AlertDialogDescription className="flex flex-row gap-1 justify-center font-medium text-center pt-2 text-neon-orange">
           Already have an account?
           <a
             onClick={() => navigate("/login")}
-            className="text-gray-500 hover:text-gray-700 transition-colors underline font-semibold cursor-pointer"
+            className="text-neon-yellow hover:text-neon-orange transition-colors underline font-semibold cursor-pointer"
           >
             Log in
           </a>
@@ -485,9 +480,8 @@ export function LoadingScreen() {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div className="flex flex-col items-center space-y-4">
-        {/* เพิ่ม gradient effect สำหรับ Loader */}
-        <Loader2 className="w-16 h-16 animate-spin text-gradient-to-r from-neon-blue to-neon-orange" />
-        <p className="text-lg font-semibold text-white">Loading...</p>
+        <Loader2 className="w-16 h-16 animate-spin text-neon-orange" />
+        <p className="text-lg font-semibold text-neon-yellow txt-shadow-neon-orange">Loading...</p>
       </div>
     </div>
   );

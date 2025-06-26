@@ -5,10 +5,7 @@
       "src": "app.mjs",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": [
-          "prisma/schema.prisma",
-          ".env.production"
-        ]
+        "runtime": "nodejs20.x"
       }
     }
   ],
@@ -17,5 +14,6 @@
       "src": "/(.*)",
       "dest": "app.mjs"
     }
-  ]
+  ],
+  "installCommand": "npm install && npx prisma generate"
 }
