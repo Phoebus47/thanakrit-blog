@@ -1,31 +1,45 @@
 import { Router } from "express";
+import jwt from "jsonwebtoken";
 import multer from "multer";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { createClient } from '@supabase/supabase-js';
 
 const uploadRoutes = Router();
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../../uploads/profiles"));
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, `profile-${uniqueSuffix}${path.extname(file.originalname)}`);
-  },
-});
+// Supabase client
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY // ใช้ service role key
+);
 
+// Middleware to verify JWT token
+const authenticateToken = (req, res, next) => {
+  const token = req.headers.authorization?.replace("Bearer ", "");
+
+  if (!token) {
+    return res.status(401).json({
+      message: "No token provided",
+    });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback-secret");
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      message: "Invalid token",
+    });
+  }
+};
+
+// Configure multer for memory storage
 const upload = multer({
-  storage: storage,
+  storage: multer.memoryStorage(),
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 2 * 1024 * 1024, // 2MB limit
   },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
@@ -35,26 +49,48 @@ const upload = multer({
 });
 
 // Upload profile picture
-uploadRoutes.post("/profile", upload.single("image"), async (req, res) => {
+uploadRoutes.post("/profile", authenticateToken, upload.single("image"), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    // Return the file URL - แก้ไขให้ใช้ HTTPS และ production URL
-    const baseUrl =
-      process.env.NODE_ENV === "production"
-        ? "https://thanakrit-blog-server.vercel.app"
-        : `${req.protocol}://${req.get("host")}`;
+    const userId = req.user.userId;
+    const fileExt = req.file.originalname.split('.').pop();
+    const fileName = `${userId}-${Date.now()}.${fileExt}`;
+    const filePath = `profiles/${fileName}`;
 
-    const imageUrl = `${baseUrl}/uploads/profiles/${req.file.filename}`;
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('profile-pictures')
+      .upload(filePath, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: true
+      });
 
-    return res.status(200).json({ imageUrl });
+    if (error) {
+      console.error('Supabase upload error:', error);
+      return res.status(500).json({ 
+        message: "Failed to upload image",
+        error: error.message 
+      });
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('profile-pictures')
+      .getPublicUrl(filePath);
+
+    return res.status(200).json({ 
+      imageUrl: urlData.publicUrl,
+      message: "Image uploaded successfully"
+    });
+
   } catch (error) {
     console.error("Error uploading file:", error);
     return res.status(500).json({
       message: "Server could not upload file",
-      error: error.message,
+      error: error.message
     });
   }
 });

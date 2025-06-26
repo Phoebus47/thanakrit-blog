@@ -83,7 +83,7 @@ export default function ProfilePage() {
         <div className="bg-red-500/20 border border-red-500/50 rounded-lg text-white p-4 flex justify-between items-start">
           <div>
             <h2 className="font-bold text-lg mb-1 font-orbitron">File too large</h2>
-            <p className="text-sm font-orbitron">Please upload an image smaller than 5MB.</p>
+            <p className="text-sm font-orbitron">Please upload an image smaller than 2MB.</p>
           </div>
           <button onClick={() => toast.dismiss(t)} className="text-white hover:text-gray-200">
             <X size={20} />
