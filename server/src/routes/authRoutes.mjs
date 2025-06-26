@@ -113,8 +113,8 @@ authRoutes.post("/login", async (req, res) => {
   }
 });
 
-// Get current user (protected route)
-authRoutes.get("/me", async (req, res) => {
+// Get current user (protected route) - เพิ่ม route นี้
+authRoutes.get("/get-user", async (req, res) => {
   try {
     const token = req.headers.authorization?.replace("Bearer ", "");
 
@@ -147,8 +147,15 @@ authRoutes.get("/me", async (req, res) => {
     return res.status(200).json(userWithoutPassword);
   } catch (error) {
     console.error("Error getting current user:", error);
-    return res.status(401).json({
-      message: "Invalid token",
+    
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({
+        message: "Invalid token",
+      });
+    }
+
+    return res.status(500).json({
+      message: "Server error getting user",
     });
   }
 });
