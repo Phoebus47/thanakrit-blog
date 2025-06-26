@@ -1,11 +1,17 @@
 import dotenv from 'dotenv';
-dotenv.config({ path: process.env.NODE_ENV === 'production' ? '.env.production' : '.env' });
+
+// Load environment variables
+if (process.env.NODE_ENV === 'production') {
+  dotenv.config({ path: '.env.production' });
+} else {
+  dotenv.config();
+}
 
 import express from "express";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from 'url';
-import multer from "multer"; // เพิ่มบรรทัดนี้
+import multer from "multer";
 
 // Routes
 import authRoutes from "./routes/authRoutes.mjs";
@@ -27,9 +33,15 @@ app.use(express.json());
 // Serve static files (uploaded images)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Health check route - เพิ่มบรรทัดนี้
+// Health check route
 app.get('/', (req, res) => {
-  res.json({ message: 'Server is running', status: 'OK' });
+  res.json({ 
+    message: 'Server is running', 
+    status: 'OK',
+    environment: process.env.NODE_ENV || 'development',
+    jwtSecretExists: !!process.env.JWT_SECRET,
+    databaseUrlExists: !!process.env.DATABASE_URL
+  });
 });
 
 // Routes
@@ -56,12 +68,20 @@ app.use((error, req, res, next) => {
   });
 });
 
+// Handle 404
+app.use('*', (req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
+
 const PORT = process.env.PORT || 4000;
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`JWT_SECRET exists: ${!!process.env.JWT_SECRET}`);
-});
+// Don't call listen() in Vercel - it's handled automatically
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`JWT_SECRET exists: ${!!process.env.JWT_SECRET}`);
+  });
+}
 
 export default app;
