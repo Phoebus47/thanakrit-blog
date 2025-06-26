@@ -41,16 +41,20 @@ uploadRoutes.post("/profile", upload.single("image"), async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    // Return the file URL
-    const imageUrl = `${req.protocol}://${req.get("host")}/uploads/profiles/${
-      req.file.filename
-    }`;
+    // Return the file URL - แก้ไขให้ใช้ HTTPS และ production URL
+    const baseUrl =
+      process.env.NODE_ENV === "production"
+        ? "https://thanakrit-blog-server.vercel.app"
+        : `${req.protocol}://${req.get("host")}`;
+
+    const imageUrl = `${baseUrl}/uploads/profiles/${req.file.filename}`;
 
     return res.status(200).json({ imageUrl });
   } catch (error) {
     console.error("Error uploading file:", error);
     return res.status(500).json({
       message: "Server could not upload file",
+      error: error.message,
     });
   }
 });
