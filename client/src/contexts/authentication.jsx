@@ -13,14 +13,41 @@ function AuthProvider(props) {
     user: null,
   });
 
+  // Configure axios defaults
+  const setupAxiosInterceptors = () => {
+    axios.defaults.baseURL = import.meta.env.VITE_SERVER_URL;
+    
+    // Add token to all requests
+    axios.interceptors.request.use((config) => {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    });
+
+    // Handle response errors
+    axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          localStorage.removeItem('authToken');
+          setState({ user: null, error: null, loading: null, getUserLoading: null });
+        }
+        return Promise.reject(error);
+      }
+    );
+  };
+
+  useEffect(() => {
+    setupAxiosInterceptors();
+  }, []);
+
   // Login user
   const login = async (data) => {
     try {
       setState((prevState) => ({ ...prevState, loading: true, error: null }));
-      const response = await axios.post(
-        `${import.meta.env.VITE_SERVER_URL}/auth/login`, // แก้จาก hardcoded URL
-        data
-      );
+      const response = await axios.post('/auth/login', data);
 
       const responseData = response.data;
 
@@ -29,13 +56,16 @@ function AuthProvider(props) {
 
       setState((prevState) => ({ ...prevState, loading: false, error: null }));
       await fetchUser();
+      
+      return { success: true };
     } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message;
       setState((prevState) => ({
         ...prevState,
         loading: false,
-        error: error.message,
+        error: errorMessage,
       }));
-      return { error: error.message };
+      return { error: errorMessage };
     }
   };
 
@@ -43,42 +73,46 @@ function AuthProvider(props) {
   const register = async (data) => {
     try {
       setState((prevState) => ({ ...prevState, loading: true, error: null }));
-      await axios.post(
-        `${import.meta.env.VITE_SERVER_URL}/auth/register`, // แก้จาก hardcoded URL
-        data
-      );
+      await axios.post('/auth/register', data);
 
       setState((prevState) => ({ ...prevState, loading: false, error: null }));
+      return { success: true };
     } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message;
       setState((prevState) => ({
         ...prevState,
         loading: false,
-        error: error.message,
+        error: errorMessage,
       }));
-      return { error: error.message };
+      return { error: errorMessage };
     }
   };
 
   // Fetch user details using Backend API
   const fetchUser = async () => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      setState((prevState) => ({ ...prevState, getUserLoading: false }));
+      return;
+    }
+
     try {
       setState((prevState) => ({ ...prevState, getUserLoading: true }));
       
-      const response = await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/auth/get-user` // แก้จาก hardcoded URL
-      );
-
+      const response = await axios.get('/auth/get-user');
       const userData = response.data;
       
       setState((prevState) => ({
         ...prevState,
         user: userData,
         getUserLoading: false,
+        error: null
       }));
     } catch (error) {
+      console.error('Fetch user error:', error);
       setState((prevState) => ({
         ...prevState,
-        error: error.message,
+        error: null,
         user: null,
         getUserLoading: false,
       }));
@@ -93,7 +127,7 @@ function AuthProvider(props) {
   // Logout user
   const logout = async () => {
     localStorage.removeItem('authToken');
-    setState({ user: null, error: null, loading: null });
+    setState({ user: null, error: null, loading: null, getUserLoading: null });
   };
 
   const isAuthenticated = Boolean(state.user);
