@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "src/app.mjs",
+      "src": "app.mjs",
       "use": "@vercel/node",
       "config": {
         "runtime": "nodejs20.x"
@@ -12,7 +12,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "src/app.mjs"
+      "dest": "app.mjs"
     }
   ],
   "installCommand": "npm install && npx prisma generate"
