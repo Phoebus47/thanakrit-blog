@@ -156,6 +156,7 @@ authRoutes.get("/get-user", async (req, res) => {
 
     return res.status(500).json({
       message: "Server error getting user",
+      error: error.message
     });
   }
 });

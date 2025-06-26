@@ -83,7 +83,7 @@ export default function ProfilePage() {
         <div className="bg-red-500/20 border border-red-500/50 rounded-lg text-white p-4 flex justify-between items-start">
           <div>
             <h2 className="font-bold text-lg mb-1 font-orbitron">File too large</h2>
-            <p className="text-sm font-orbitron">Please upload an image smaller than 5MB.</p>
+            <p className="text-sm font-orbitron">Please upload an image smaller than 2MB.</p>
           </div>
           <button onClick={() => toast.dismiss(t)} className="text-white hover:text-gray-200">
             <X size={20} />
@@ -113,22 +113,32 @@ export default function ProfilePage() {
         formData.append('image', imageFile);
         formData.append('userId', state.user.id);
 
+        // เพิ่ม Authorization header
+        const token = localStorage.getItem('authToken');
         const uploadResponse = await fetch(`${import.meta.env.VITE_SERVER_URL}/upload/profile`, {
           method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`, // เพิ่ม token
+          },
           body: formData,
         });
 
-        if (!uploadResponse.ok) throw new Error('Failed to upload image');
+        if (!uploadResponse.ok) {
+          const errorData = await uploadResponse.json();
+          throw new Error(errorData.message || 'Failed to upload image');
+        }
         
         const uploadData = await uploadResponse.json();
         profilePicUrl = uploadData.imageUrl;
       }
 
       // Update user profile via backend API
+      const token = localStorage.getItem('authToken');
       const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/users/${state.user.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, // เพิ่ม token
         },
         body: JSON.stringify({
           name: profile.name,
@@ -137,7 +147,10 @@ export default function ProfilePage() {
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to update profile');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update profile');
+      }
 
       toast.custom((t) => (
         <div className="bg-green-500/20 border border-green-500/50 rounded-lg text-white p-4 flex justify-between items-start">
