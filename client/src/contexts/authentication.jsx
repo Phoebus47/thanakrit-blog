@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable react/prop-types */
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const AuthContext = React.createContext();
 
@@ -12,77 +13,16 @@ function AuthProvider(props) {
     user: null,
   });
 
-
-  // Fetch user details using Backend API
-  const fetchUser = async () => {
-    try {
-      setState((prevState) => ({ ...prevState, getUserLoading: true }));
-      
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        setState((prevState) => ({
-          ...prevState,
-          user: null,
-          getUserLoading: false,
-        }));
-        return;
-      }
-
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/auth/me`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        }
-      });
-
-      if (!response.ok) {
-        localStorage.removeItem('authToken');
-        throw new Error('Invalid token');
-      }
-
-      const userData = await response.json();
-      
-      setState((prevState) => ({
-        ...prevState,
-        user: userData,
-        getUserLoading: false,
-      }));
-    } catch (error) {
-      setState((prevState) => ({
-        ...prevState,
-        error: error.message,
-        user: null,
-        getUserLoading: false,
-      }));
-      localStorage.removeItem('authToken');
-    }
-  };
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
   // Login user
   const login = async (data) => {
     try {
       setState((prevState) => ({ ...prevState, loading: true, error: null }));
-      
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-        }),
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_SERVER_URL}/auth/login`, // แก้จาก hardcoded URL
+        data
+      );
 
-      const responseData = await response.json();
-
-      if (!response.ok) {
-        throw new Error(responseData.message || 'Login failed');
-      }
+      const responseData = response.data;
 
       // Store token in localStorage
       localStorage.setItem('authToken', responseData.token);
@@ -103,25 +43,10 @@ function AuthProvider(props) {
   const register = async (data) => {
     try {
       setState((prevState) => ({ ...prevState, loading: true, error: null }));
-      
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-          name: data.name,
-          username: data.username,
-        }),
-      });
-
-      const responseData = await response.json();
-
-      if (!response.ok) {
-        throw new Error(responseData.message || 'Registration failed');
-      }
+      await axios.post(
+        `${import.meta.env.VITE_SERVER_URL}/auth/register`, // แก้จาก hardcoded URL
+        data
+      );
 
       setState((prevState) => ({ ...prevState, loading: false, error: null }));
     } catch (error) {
@@ -133,6 +58,37 @@ function AuthProvider(props) {
       return { error: error.message };
     }
   };
+
+  // Fetch user details using Backend API
+  const fetchUser = async () => {
+    try {
+      setState((prevState) => ({ ...prevState, getUserLoading: true }));
+      
+      const response = await axios.get(
+        `${import.meta.env.VITE_SERVER_URL}/auth/get-user` // แก้จาก hardcoded URL
+      );
+
+      const userData = response.data;
+      
+      setState((prevState) => ({
+        ...prevState,
+        user: userData,
+        getUserLoading: false,
+      }));
+    } catch (error) {
+      setState((prevState) => ({
+        ...prevState,
+        error: error.message,
+        user: null,
+        getUserLoading: false,
+      }));
+      localStorage.removeItem('authToken');
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
   // Logout user
   const logout = async () => {

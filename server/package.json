@@ -2,15 +2,13 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
-  "main": "src/app.mjs",
+  "main": "app.mjs",
   "type": "module",
   "scripts": {
-    "dev": "nodemon src/app.mjs",
-    "start": "node src/app.mjs",
+    "dev": "nodemon app.mjs",
+    "start": "node app.mjs",
     "build": "npx prisma generate",
-    "postinstall": "npx prisma generate",
-    "generate": "npx prisma generate",
-    "db:pull": "npx prisma db pull"
+    "postinstall": "npx prisma generate"
   },
   "keywords": [],
   "author": "",
