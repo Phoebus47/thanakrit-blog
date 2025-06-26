@@ -2,7 +2,6 @@
 /* eslint-disable react/prop-types */
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 const AuthContext = React.createContext();
 
@@ -14,28 +13,66 @@ function AuthProvider(props) {
     user: null,
   });
 
-  const navigate = useNavigate();
+  // Login user
+  const login = async (data) => {
+    try {
+      setState((prevState) => ({ ...prevState, loading: true, error: null }));
+      const response = await axios.post(
+        `${import.meta.env.VITE_SERVER_URL}/auth/login`, // แก้จาก hardcoded URL
+        data
+      );
 
-  // Fetch user details using Supabase API
-  const fetchUser = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
+      const responseData = response.data;
+
+      // Store token in localStorage
+      localStorage.setItem('authToken', responseData.token);
+
+      setState((prevState) => ({ ...prevState, loading: false, error: null }));
+      await fetchUser();
+    } catch (error) {
       setState((prevState) => ({
         ...prevState,
-        user: null,
-        getUserLoading: false,
+        loading: false,
+        error: error.message,
       }));
-      return;
+      return { error: error.message };
     }
+  };
 
+  // Register user
+  const register = async (data) => {
+    try {
+      setState((prevState) => ({ ...prevState, loading: true, error: null }));
+      await axios.post(
+        `${import.meta.env.VITE_SERVER_URL}/auth/register`, // แก้จาก hardcoded URL
+        data
+      );
+
+      setState((prevState) => ({ ...prevState, loading: false, error: null }));
+    } catch (error) {
+      setState((prevState) => ({
+        ...prevState,
+        loading: false,
+        error: error.message,
+      }));
+      return { error: error.message };
+    }
+  };
+
+  // Fetch user details using Backend API
+  const fetchUser = async () => {
     try {
       setState((prevState) => ({ ...prevState, getUserLoading: true }));
+      
       const response = await axios.get(
-        "https://blog-post-project-api-with-db.vercel.app/auth/get-user"
+        `${import.meta.env.VITE_SERVER_URL}/auth/get-user` // แก้จาก hardcoded URL
       );
+
+      const userData = response.data;
+      
       setState((prevState) => ({
         ...prevState,
-        user: response.data,
+        user: userData,
         getUserLoading: false,
       }));
     } catch (error) {
@@ -45,63 +82,18 @@ function AuthProvider(props) {
         user: null,
         getUserLoading: false,
       }));
+      localStorage.removeItem('authToken');
     }
   };
 
   useEffect(() => {
-    fetchUser(); // Load user on initial app load
+    fetchUser();
   }, []);
 
-  // Login user
-  const login = async (data) => {
-    try {
-      setState((prevState) => ({ ...prevState, loading: true, error: null }));
-      const response = await axios.post(
-        "https://blog-post-project-api-with-db.vercel.app/auth/login",
-        data
-      );
-      const token = response.data.access_token;
-      localStorage.setItem("token", token);
-
-      // Fetch and set user details
-      setState((prevState) => ({ ...prevState, loading: false, error: null }));
-      navigate("/");
-      await fetchUser();
-    } catch (error) {
-      setState((prevState) => ({
-        ...prevState,
-        loading: false,
-        error: error.response?.data?.error || "Login failed",
-      }));
-      return { error: error.response?.data?.error || "Login failed" };
-    }
-  };
-
-  // Register user
-  const register = async (data) => {
-    try {
-      setState((prevState) => ({ ...prevState, loading: true, error: null }));
-      await axios.post(
-        "https://blog-post-project-api-with-db.vercel.app/auth/register",
-        data
-      );
-      setState((prevState) => ({ ...prevState, loading: false, error: null }));
-      navigate("/sign-up/success");
-    } catch (error) {
-      setState((prevState) => ({
-        ...prevState,
-        loading: false,
-        error: error.response?.data?.error || "Registration failed",
-      }));
-      return { error: state.error };
-    }
-  };
-
   // Logout user
-  const logout = () => {
-    localStorage.removeItem("token");
+  const logout = async () => {
+    localStorage.removeItem('authToken');
     setState({ user: null, error: null, loading: null });
-    navigate("/");
   };
 
   const isAuthenticated = Boolean(state.user);
