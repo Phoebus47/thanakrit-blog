@@ -12,23 +12,20 @@ authRoutes.post("/register", async (req, res) => {
 
     if (!email || !password || !name || !username) {
       return res.status(400).json({
-        message: "All fields are required"
+        message: "All fields are required",
       });
     }
 
     // Check if user already exists
     const existingUser = await prisma.users.findFirst({
       where: {
-        OR: [
-          { email: email },
-          { username: username }
-        ]
-      }
+        OR: [{ email: email }, { username: username }],
+      },
     });
 
     if (existingUser) {
       return res.status(400).json({
-        message: "User with this email or username already exists"
+        message: "User with this email or username already exists",
       });
     }
 
@@ -43,8 +40,8 @@ authRoutes.post("/register", async (req, res) => {
         password: hashedPassword,
         name,
         username,
-        role: 'user'
-      }
+        role: "user",
+      },
     });
 
     // Remove password from response
@@ -52,12 +49,12 @@ authRoutes.post("/register", async (req, res) => {
 
     return res.status(201).json({
       message: "User registered successfully",
-      user: userWithoutPassword
+      user: userWithoutPassword,
     });
   } catch (error) {
     console.error("Error registering user:", error);
     return res.status(500).json({
-      message: "Server error during registration"
+      message: "Server error during registration",
     });
   }
 });
@@ -69,18 +66,18 @@ authRoutes.post("/login", async (req, res) => {
 
     if (!email || !password) {
       return res.status(400).json({
-        message: "Email and password are required"
+        message: "Email and password are required",
       });
     }
 
     // Find user
     const user = await prisma.users.findUnique({
-      where: { email }
+      where: { email },
     });
 
     if (!user) {
       return res.status(401).json({
-        message: "Invalid credentials"
+        message: "Invalid credentials",
       });
     }
 
@@ -89,15 +86,15 @@ authRoutes.post("/login", async (req, res) => {
 
     if (!isPasswordValid) {
       return res.status(401).json({
-        message: "Invalid credentials"
+        message: "Invalid credentials",
       });
     }
 
     // Generate JWT token
     const token = jwt.sign(
       { userId: user.id },
-      process.env.JWT_SECRET || 'fallback-secret',
-      { expiresIn: '7d' }
+      process.env.JWT_SECRET || "fallback-secret",
+      { expiresIn: "7d" }
     );
 
     // Remove password from response
@@ -106,12 +103,12 @@ authRoutes.post("/login", async (req, res) => {
     return res.status(200).json({
       message: "Login successful",
       token,
-      user: userWithoutPassword
+      user: userWithoutPassword,
     });
   } catch (error) {
     console.error("Error logging in user:", error);
     return res.status(500).json({
-      message: "Server error during login"
+      message: "Server error during login",
     });
   }
 });
@@ -119,25 +116,28 @@ authRoutes.post("/login", async (req, res) => {
 // Get current user (protected route)
 authRoutes.get("/me", async (req, res) => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
+    const token = req.headers.authorization?.replace("Bearer ", "");
 
     if (!token) {
       return res.status(401).json({
-        message: "No token provided"
+        message: "No token provided",
       });
     }
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
-    
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "fallback-secret"
+    );
+
     // Get user
     const user = await prisma.users.findUnique({
-      where: { id: decoded.userId }
+      where: { id: decoded.userId },
     });
 
     if (!user) {
       return res.status(401).json({
-        message: "User not found"
+        message: "User not found",
       });
     }
 
@@ -148,7 +148,7 @@ authRoutes.get("/me", async (req, res) => {
   } catch (error) {
     console.error("Error getting current user:", error);
     return res.status(401).json({
-      message: "Invalid token"
+      message: "Invalid token",
     });
   }
 });
@@ -156,47 +156,53 @@ authRoutes.get("/me", async (req, res) => {
 // Reset password (protected route)
 authRoutes.put("/reset-password", async (req, res) => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
+    const token = req.headers.authorization?.replace("Bearer ", "");
     const { currentPassword, newPassword } = req.body;
 
     if (!token) {
       return res.status(401).json({
-        message: "No token provided"
+        message: "No token provided",
       });
     }
 
     if (!currentPassword || !newPassword) {
       return res.status(400).json({
-        message: "Current password and new password are required"
+        message: "Current password and new password are required",
       });
     }
 
     if (newPassword.length < 8) {
       return res.status(400).json({
-        message: "New password must be at least 8 characters long"
+        message: "New password must be at least 8 characters long",
       });
     }
 
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
-    
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "fallback-secret"
+    );
+
     // Get user
     const user = await prisma.users.findUnique({
-      where: { id: decoded.userId }
+      where: { id: decoded.userId },
     });
 
     if (!user) {
       return res.status(401).json({
-        message: "User not found"
+        message: "User not found",
       });
     }
 
     // Verify current password
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    const isCurrentPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
 
     if (!isCurrentPasswordValid) {
       return res.status(400).json({
-        message: "Current password is incorrect"
+        message: "Current password is incorrect",
       });
     }
 
@@ -206,23 +212,23 @@ authRoutes.put("/reset-password", async (req, res) => {
     // Update password
     await prisma.users.update({
       where: { id: decoded.userId },
-      data: { password: hashedNewPassword }
+      data: { password: hashedNewPassword },
     });
 
     return res.status(200).json({
-      message: "Password updated successfully"
+      message: "Password updated successfully",
     });
   } catch (error) {
     console.error("Error resetting password:", error);
-    
-    if (error.name === 'JsonWebTokenError') {
+
+    if (error.name === "JsonWebTokenError") {
       return res.status(401).json({
-        message: "Invalid token"
+        message: "Invalid token",
       });
     }
 
     return res.status(500).json({
-      message: "Server error during password reset"
+      message: "Server error during password reset",
     });
   }
 });

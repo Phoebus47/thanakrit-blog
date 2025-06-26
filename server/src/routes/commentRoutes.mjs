@@ -7,25 +7,25 @@ const commentRoutes = Router();
 commentRoutes.get("/:postId", async (req, res) => {
   try {
     const postId = Number(req.params.postId);
-    
+
     const comments = await prisma.comments.findMany({
       where: { post_id: postId },
-      include: { 
+      include: {
         users: {
           select: {
             name: true,
-            profile_pic: true
-          }
-        }
+            profile_pic: true,
+          },
+        },
       },
-      orderBy: { created_at: 'desc' }
+      orderBy: { created_at: "desc" },
     });
 
     return res.status(200).json(comments);
   } catch (error) {
     console.error("Error fetching comments:", error);
     return res.status(500).json({
-      message: "Server could not fetch comments"
+      message: "Server could not fetch comments",
     });
   }
 });
@@ -37,7 +37,7 @@ commentRoutes.post("/", async (req, res) => {
 
     if (!post_id || !user_id || !comment_text) {
       return res.status(400).json({
-        message: "Missing required fields"
+        message: "Missing required fields",
       });
     }
 
@@ -45,23 +45,23 @@ commentRoutes.post("/", async (req, res) => {
       data: {
         post_id: Number(post_id),
         user_id,
-        comment_text
+        comment_text,
       },
       include: {
         users: {
           select: {
             name: true,
-            profile_pic: true
-          }
-        }
-      }
+            profile_pic: true,
+          },
+        },
+      },
     });
 
     return res.status(201).json(comment);
   } catch (error) {
     console.error("Error creating comment:", error);
     return res.status(500).json({
-      message: "Server could not create comment"
+      message: "Server could not create comment",
     });
   }
 });

@@ -7,9 +7,9 @@ const userRoutes = Router();
 userRoutes.get("/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
-    
+
     const user = await prisma.users.findUnique({
-      where: { id: userId }
+      where: { id: userId },
     });
 
     if (!user) {
@@ -18,12 +18,12 @@ userRoutes.get("/:userId", async (req, res) => {
 
     // Remove password from response
     const { password, ...userWithoutPassword } = user;
-    
+
     return res.status(200).json(userWithoutPassword);
   } catch (error) {
     console.error("Error fetching user:", error);
     return res.status(500).json({
-      message: "Server could not fetch user"
+      message: "Server could not fetch user",
     });
   }
 });
@@ -39,13 +39,13 @@ userRoutes.put("/:userId", async (req, res) => {
       const existingUser = await prisma.users.findFirst({
         where: {
           username: username,
-          NOT: { id: userId }
-        }
+          NOT: { id: userId },
+        },
       });
 
       if (existingUser) {
         return res.status(400).json({
-          message: "Username already taken"
+          message: "Username already taken",
         });
       }
     }
@@ -55,18 +55,18 @@ userRoutes.put("/:userId", async (req, res) => {
       data: {
         ...(name && { name }),
         ...(username && { username }),
-        ...(profile_pic && { profile_pic })
-      }
+        ...(profile_pic && { profile_pic }),
+      },
     });
 
     // Remove password from response
     const { password, ...userWithoutPassword } = updatedUser;
-    
+
     return res.status(200).json(userWithoutPassword);
   } catch (error) {
     console.error("Error updating user:", error);
     return res.status(500).json({
-      message: "Server could not update user"
+      message: "Server could not update user",
     });
   }
 });
