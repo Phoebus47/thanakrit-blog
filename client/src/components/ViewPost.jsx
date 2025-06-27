@@ -14,6 +14,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@contexts/authentication";
 import remarkGfm from "remark-gfm";
+import axios from "axios";
 
 export function ViewPost({ onLoadingChange }) {
   const [img, setImg] = useState("");
@@ -41,17 +42,8 @@ export function ViewPost({ onLoadingChange }) {
     if (onLoadingChange) onLoadingChange(true);
     try {
       // Fetch post data from backend API
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/posts/${param.postId}`, {
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Post not found');
-      }
-
-      const postData = await response.json();
+      const response = await axios.get(`/posts/${param.postId}`);
+      const postData = response.data;
 
       if (postData) {
         setImg(postData.image || "");
@@ -64,16 +56,8 @@ export function ViewPost({ onLoadingChange }) {
       }
 
       // Fetch comments from backend API (ต้องสร้าง API endpoint)
-      const commentsResponse = await fetch(`${import.meta.env.VITE_SERVER_URL}/comments/${param.postId}`, {
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      if (commentsResponse.ok) {
-        const commentsData = await commentsResponse.json();
-        setComments(commentsData || []);
-      }
+      const commentsResponse = await axios.get(`/comments/${param.postId}`);
+      setComments(commentsResponse.data || []);
 
       setIsLoading(false);
     } catch (error) {
@@ -189,21 +173,12 @@ function Share({ likesAmount, setDialogState, user, setLikes }) {
 
     setIsLiking(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/likes`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          post_id: param.postId,
-          user_id: user.id
-        })
+      const response = await axios.post('/likes', {
+        post_id: param.postId,
+        user_id: user.id
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setLikes(data.count);
-      }
+      setLikes(response.data.count);
     } catch (error) {
       console.error("Error toggling like:", error);
     } finally {
@@ -306,23 +281,14 @@ function Comment({ setDialogState, commentList, setComments, user }) {
     setIsError(false);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/comments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          post_id: param.postId,
-          user_id: user.id,
-          comment_text: newComment
-        })
+      const response = await axios.post('/comments', {
+        post_id: param.postId,
+        user_id: user.id,
+        comment_text: newComment
       });
 
-      if (response.ok) {
-        const newCommentData = await response.json();
-        setComments([newCommentData, ...commentList]);
-        setNewComment("");
-      }
+      setComments([response.data, ...commentList]);
+      setNewComment("");
     } catch (error) {
       console.error("Error adding comment:", error);
     }

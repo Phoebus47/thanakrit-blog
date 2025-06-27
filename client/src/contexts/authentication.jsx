@@ -2,6 +2,7 @@
 /* eslint-disable react/prop-types */
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import jwtInterceptors from "../utils/jwtInterceptors";
 
 const AuthContext = React.createContext();
 
@@ -13,34 +14,13 @@ function AuthProvider(props) {
     user: null,
   });
 
-  // Configure axios defaults
-  const setupAxiosInterceptors = () => {
-    axios.defaults.baseURL = import.meta.env.VITE_SERVER_URL;
-    
-    // Add token to all requests
-    axios.interceptors.request.use((config) => {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      return config;
-    });
-
-    // Handle response errors
-    axios.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error.response?.status === 401) {
-          localStorage.removeItem('authToken');
-          setState({ user: null, error: null, loading: null, getUserLoading: null });
-        }
-        return Promise.reject(error);
-      }
-    );
-  };
-
+  // Set unauthorized callback
   useEffect(() => {
-    setupAxiosInterceptors();
+    const handleUnauthorized = () => {
+      setState({ user: null, error: null, loading: null, getUserLoading: null });
+    };
+    
+    jwtInterceptors.setUnauthorizedCallback(handleUnauthorized);
   }, []);
 
   // Login user
@@ -51,8 +31,8 @@ function AuthProvider(props) {
 
       const responseData = response.data;
 
-      // Store token in localStorage
-      localStorage.setItem('authToken', responseData.token);
+      // Store token using jwtInterceptors
+      jwtInterceptors.setToken(responseData.token);
 
       setState((prevState) => ({ ...prevState, loading: false, error: null }));
       await fetchUser();
@@ -90,7 +70,7 @@ function AuthProvider(props) {
 
   // Fetch user details using Backend API
   const fetchUser = async () => {
-    const token = localStorage.getItem('authToken');
+    const token = jwtInterceptors.getToken();
     if (!token) {
       setState((prevState) => ({ ...prevState, getUserLoading: false }));
       return;
@@ -116,7 +96,7 @@ function AuthProvider(props) {
         user: null,
         getUserLoading: false,
       }));
-      localStorage.removeItem('authToken');
+      jwtInterceptors.clearToken();
     }
   };
 
@@ -126,7 +106,7 @@ function AuthProvider(props) {
 
   // Logout user
   const logout = async () => {
-    localStorage.removeItem('authToken');
+    jwtInterceptors.clearToken();
     setState({ user: null, error: null, loading: null, getUserLoading: null });
   };
 

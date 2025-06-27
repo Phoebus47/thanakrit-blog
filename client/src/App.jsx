@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/authentication";
 import { Toaster } from "sonner";
@@ -12,8 +12,14 @@ import ProfilePage from "./pages/ProfilePage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import AuthenticationRoute from "./components/auth/AuthenticationRoute"; // แก้ไข path
 import ProtectedRoute from "./components/auth/ProtectedRoute"; // แก้ไข path
+import jwtInterceptors from "./utils/jwtInterceptors";
 
 function App() {
+  // Setup JWT interceptors globally when app starts
+  useEffect(() => {
+    jwtInterceptors.setup();
+  }, []);
+
   return (
     <BrowserRouter>
       <AuthProvider>
