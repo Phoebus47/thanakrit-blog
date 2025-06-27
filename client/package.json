@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "vite",
     "start": "vite preview",
-    "build": "npm run generate-sitemap && vite build",
+    "build": "npm run type-check && npm run generate-sitemap && vite build",
     "lint": "eslint .",
+    "type-check": "tsc --noEmit",
     "generate-sitemap": "node scripts/generate-sitemap.js"
   },
   "dependencies": {
@@ -39,13 +40,17 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
-    "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.4",
+    "@types/lodash": "^4.17.19",
+    "@types/node": "^24.0.4",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.3.4",
+    "@vitejs/plugin-react-swc": "^3.10.2",
     "eslint": "^9.21.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^15.15.0",
+    "typescript": "^5.8.3",
     "vite": "^6.2.0"
   }
 }
