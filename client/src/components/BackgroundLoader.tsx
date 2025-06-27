@@ -1,6 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, ReactNode } from "react";
 
-export function BackgroundLoader({ imageUrl, children }) {
+interface BackgroundLoaderProps {
+  imageUrl: string;
+  children: ReactNode;
+}
+
+export function BackgroundLoader({ imageUrl, children }: BackgroundLoaderProps) {
   const [backgroundLoaded, setBackgroundLoaded] = useState(false);
 
   useEffect(() => {

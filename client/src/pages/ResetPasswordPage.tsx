@@ -35,7 +35,7 @@ export default function ResetPasswordPage() {
     }
   }, [state.getUserLoading, isAuthenticated, navigate]);
 
-  const togglePasswordVisibility = (field) => {
+  const togglePasswordVisibility = (field: keyof typeof showPasswords) => {
     setShowPasswords(prev => ({
       ...prev,
       [field]: !prev[field]
@@ -56,7 +56,7 @@ export default function ResetPasswordPage() {
     return isValidPassword && isValidNewPassword && isValidConfirmPassword;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     if (!validateForm()) return;
@@ -86,12 +86,13 @@ export default function ResetPasswordPage() {
       setPassword("");
       setNewPassword("");
       setConfirmNewPassword("");
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Something went wrong.";
       toast.custom((t) => (
         <div className="bg-red-500/20 border border-red-500/50 rounded-lg text-white p-4 flex justify-between items-start">
           <div>
             <h2 className="font-bold text-lg mb-1 font-orbitron">Error</h2>
-            <p className="text-sm font-orbitron">{error.message || "Something went wrong."}</p>
+            <p className="text-sm font-orbitron">{errorMessage}</p>
           </div>
           <button onClick={() => toast.dismiss(t)} className="text-white hover:text-gray-200">
             <X size={20} />
@@ -176,7 +177,7 @@ export default function ResetPasswordPage() {
                   <Input
                     type={showPasswords.current ? "text" : "password"}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                     className={`w-full p-3 rounded-lg bg-slate-800/50 border text-white font-orbitron placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-neon-pink/20 ${
                       !valid.password ? "border-red-500 focus:border-red-500" : "border-neon-blue/40 focus:border-neon-pink"
                     }`}
@@ -205,7 +206,7 @@ export default function ResetPasswordPage() {
                   <Input
                     type={showPasswords.new ? "text" : "password"}
                     value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
                     className={`w-full p-3 rounded-lg bg-slate-800/50 border text-white font-orbitron placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-neon-pink/20 ${
                       !valid.newPassword ? "border-red-500 focus:border-red-500" : "border-neon-blue/40 focus:border-neon-pink"
                     }`}
@@ -234,7 +235,7 @@ export default function ResetPasswordPage() {
                   <Input
                     type={showPasswords.confirm ? "text" : "password"}
                     value={confirmNewPassword}
-                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmNewPassword(e.target.value)}
                     className={`w-full p-3 rounded-lg bg-slate-800/50 border text-white font-orbitron placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-neon-pink/20 ${
                       !valid.confirmNewPassword ? "border-red-500 focus:border-red-500" : "border-neon-blue/40 focus:border-neon-pink"
                     }`}

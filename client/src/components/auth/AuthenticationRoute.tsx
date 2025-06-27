@@ -1,8 +1,9 @@
 /* eslint-disable react/prop-types */
 import { Navigate } from "react-router-dom";
 import { LoadingScreen } from "../WebSection";
+import type { AuthRouteProps } from "../../types";
 
-function AuthenticationRoute({ isLoading, isAuthenticated, children }) {
+function AuthenticationRoute({ isLoading, isAuthenticated, children }: AuthRouteProps) {
   if (isLoading === null || isLoading) {
     // Loading state or no data yet
     return (

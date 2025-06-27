@@ -1,13 +1,33 @@
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable react/prop-types */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 import axios from "axios";
 import jwtInterceptors from "../utils/jwtInterceptors";
+import type { 
+  AuthState, 
+  User, 
+  LoginCredentials, 
+  RegisterCredentials, 
+  ApiResponse 
+} from "../types";
 
-const AuthContext = React.createContext();
+interface AuthContextType {
+  state: AuthState;
+  login: (data: LoginCredentials) => Promise<ApiResponse>;
+  logout: () => Promise<void>;
+  register: (data: RegisterCredentials) => Promise<ApiResponse>;
+  isAuthenticated: boolean;
+  fetchUser: () => Promise<void>;
+}
 
-function AuthProvider(props) {
-  const [state, setState] = useState({
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+interface AuthProviderProps {
+  children: React.ReactNode;
+}
+
+function AuthProvider({ children }: AuthProviderProps) {
+  const [state, setState] = useState<AuthState>({
     loading: null,
     getUserLoading: null,
     error: null,
@@ -24,7 +44,7 @@ function AuthProvider(props) {
   }, []);
 
   // Login user
-  const login = async (data) => {
+  const login = async (data: LoginCredentials): Promise<ApiResponse> => {
     try {
       setState((prevState) => ({ ...prevState, loading: true, error: null }));
       const response = await axios.post('/auth/login', data);
@@ -38,38 +58,38 @@ function AuthProvider(props) {
       await fetchUser();
       
       return { success: true };
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message;
       setState((prevState) => ({
         ...prevState,
         loading: false,
         error: errorMessage,
       }));
-      return { error: errorMessage };
+      return { success: false, error: errorMessage };
     }
   };
 
   // Register user
-  const register = async (data) => {
+  const register = async (data: RegisterCredentials): Promise<ApiResponse> => {
     try {
       setState((prevState) => ({ ...prevState, loading: true, error: null }));
       await axios.post('/auth/register', data);
 
       setState((prevState) => ({ ...prevState, loading: false, error: null }));
       return { success: true };
-    } catch (error) {
+    } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message;
       setState((prevState) => ({
         ...prevState,
         loading: false,
         error: errorMessage,
       }));
-      return { error: errorMessage };
+      return { success: false, error: errorMessage };
     }
   };
 
   // Fetch user details using Backend API
-  const fetchUser = async () => {
+  const fetchUser = async (): Promise<void> => {
     const token = jwtInterceptors.getToken();
     if (!token) {
       setState((prevState) => ({ ...prevState, getUserLoading: false }));
@@ -80,7 +100,7 @@ function AuthProvider(props) {
       setState((prevState) => ({ ...prevState, getUserLoading: true }));
       
       const response = await axios.get('/auth/get-user');
-      const userData = response.data;
+      const userData: User = response.data;
       
       setState((prevState) => ({
         ...prevState,
@@ -88,7 +108,7 @@ function AuthProvider(props) {
         getUserLoading: false,
         error: null
       }));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Fetch user error:', error);
       setState((prevState) => ({
         ...prevState,
@@ -105,7 +125,7 @@ function AuthProvider(props) {
   }, []);
 
   // Logout user
-  const logout = async () => {
+  const logout = async (): Promise<void> => {
     jwtInterceptors.clearToken();
     setState({ user: null, error: null, loading: null, getUserLoading: null });
   };
@@ -123,12 +143,18 @@ function AuthProvider(props) {
         fetchUser,
       }}
     >
-      {props.children}
+      {children}
     </AuthContext.Provider>
   );
 }
 
 // Hook for consuming AuthContext
-const useAuth = () => React.useContext(AuthContext);
+const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
 
 export { AuthProvider, useAuth };

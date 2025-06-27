@@ -9,13 +9,22 @@ import {
 } from "@radix-ui/react-navigation-menu";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
+interface CategorySelectorProps {
+  type?: "tabs" | "dropdown";
+  categories: string[];
+  category: string;
+  onCategoryChange: (category: string) => void;
+  className?: string;
+}
+
 export function CategorySelector({
   type = "tabs",
   categories,
   category,
   onCategoryChange,
-}) {
-  const handleCategoryChange = (newCategory) => {
+  className,
+}: CategorySelectorProps) {
+  const handleCategoryChange = (newCategory: string) => {
     if (newCategory !== category) {
       onCategoryChange(newCategory);
     }
@@ -51,7 +60,10 @@ export function CategorySelector({
     <NavigationMenu>
       <NavigationMenuList>
         <NavigationMenuItem>
-          <NavigationMenuTrigger className="w-full flex justify-between items-center px-3 py-2 font-bold txt-shadow-neon-orange bg-gradient-to-r from-orange-200/80 via-yellow-100/60 to-yellow-100/0 border border-yellow-300 shadow-[0_0_16px_#ffe066] rounded-lg mt-4 hover:from-yellow-200 hover:to-orange-100 hover:shadow-[0_0_32px_#ffe066] transition-all duration-300">
+          <NavigationMenuTrigger className={cn(
+            "w-full flex justify-between items-center px-3 py-2 font-bold txt-shadow-neon-orange bg-gradient-to-r from-orange-200/80 via-yellow-100/60 to-yellow-100/0 border border-yellow-300 shadow-[0_0_16px_#ffe066] rounded-lg mt-4 hover:from-yellow-200 hover:to-orange-100 hover:shadow-[0_0_32px_#ffe066] transition-all duration-300",
+            className
+          )}>
             <span>{category}</span>
             <ExpandMoreIcon />
           </NavigationMenuTrigger>

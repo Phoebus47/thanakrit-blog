@@ -1,6 +1,6 @@
-import { NavBar, Footer } from "../components/WebSection";
+import { NavBar, Footer, LoadingScreen } from "../components/WebSection";
 import { BackgroundLoader } from "@/components/BackgroundLoader";
-import { ViewPost, LoadingScreen } from "@/components/ViewPost";
+import { ViewPost } from "@/components/ViewPost";
 import { useState } from "react";
 
 function ViewPostPage() {

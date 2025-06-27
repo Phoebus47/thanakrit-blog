@@ -20,7 +20,7 @@ export const NavBar = () => {
   };
 
   // ฟังก์ชันสำหรับแปลงชื่อเป็น "Firstname L."
-  const formatDisplayName = (fullName) => {
+  const formatDisplayName = (fullName: string) => {
     if (!fullName) return "User";
 
     const nameParts = fullName.trim().split(" ");
@@ -30,7 +30,7 @@ export const NavBar = () => {
 
     const firstName = nameParts[0];
     const lastName = nameParts[nameParts.length - 1];
-    const lastNameInitial = lastName.charAt(0).toUpperCase();
+    const lastNameInitial = lastName?.charAt(0).toUpperCase() || "";
 
     return `${firstName} ${lastNameInitial}.`;
   };
@@ -251,7 +251,7 @@ export const NavBar = () => {
                     textShadow: "0 0 8px #ffe066",
                   }}
                 >
-                  {formatDisplayName(state.user?.name)}{" "}
+                  {formatDisplayName(state.user?.name || "")}{" "}
                 </span>
                 <svg
                   width="24"
@@ -405,7 +405,7 @@ export const NavBar = () => {
                     textShadow: "0 0 8px #ffe066",
                   }}
                 >
-                  {formatDisplayName(state.user?.name)}
+                  {formatDisplayName(state.user?.name || "")}
                 </div>
                 <div className="text-neon-blue/70 text-sm font-orbitron">
                   {state.user?.role || "User"}
@@ -574,9 +574,19 @@ export function HeroSection() {
     document.head.appendChild(ogDescription);
 
     return () => {
-      document.head.removeChild(metaDescription);
-      document.head.removeChild(ogImage);
-      document.head.removeChild(ogDescription);
+      try {
+        if (metaDescription.parentNode) {
+          document.head.removeChild(metaDescription);
+        }
+        if (ogImage.parentNode) {
+          document.head.removeChild(ogImage);
+        }
+        if (ogDescription.parentNode) {
+          document.head.removeChild(ogDescription);
+        }
+      } catch (error) {
+        // Ignore errors if elements are already removed
+      }
     };
   }, []);
 
@@ -615,7 +625,7 @@ export function HeroSection() {
               decoding="async"
               fetchPriority="high"
               className="relative w-full h-full object-cover fade-mask transition-opacity duration-700 drop-shadow-[0_0_2px_#00fff7]"
-              onLoad={(e) => (e.target.style.opacity = 1)}
+              onLoad={(e) => ((e.target as HTMLImageElement).style.opacity = '1')}
             />
           </div>
           <div>
@@ -684,7 +694,7 @@ export function HeroSection() {
               decoding="async"
               fetchPriority="high"
               className="relative w-full h-full object-cover fade-mask transition-opacity duration-700 opacity-0 drop-shadow-[0_0_2px_#00fff7]"
-              onLoad={(e) => (e.target.style.opacity = 1)}
+              onLoad={(e) => ((e.target as HTMLImageElement).style.opacity = '1')}
             />
           </div>
           <div className="w-1/3 pl-8">

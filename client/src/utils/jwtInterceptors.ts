@@ -1,17 +1,16 @@
 import axios from "axios";
+import type { JWTInterceptorsInterface } from "../types";
 
-class JWTInterceptors {
-  constructor() {
-    this.isSetup = false;
-    this.onUnauthorizedCallback = null;
-  }
+class JWTInterceptors implements JWTInterceptorsInterface {
+  private isSetup: boolean = false;
+  private onUnauthorizedCallback: (() => void) | null = null;
 
   // Setup axios configuration
-  setup(onUnauthorized = null) {
+  setup(onUnauthorized?: () => void): void {
     if (this.isSetup) return;
 
     // Store callback for later use
-    this.onUnauthorizedCallback = onUnauthorized;
+    this.onUnauthorizedCallback = onUnauthorized || null;
 
     // Set base URL
     axios.defaults.baseURL = import.meta.env.VITE_SERVER_URL;
@@ -51,35 +50,35 @@ class JWTInterceptors {
   }
 
   // Set unauthorized callback (can be called from AuthProvider)
-  setUnauthorizedCallback(callback) {
+  setUnauthorizedCallback(callback: () => void): void {
     this.onUnauthorizedCallback = callback;
   }
 
   // Set token in localStorage and update default headers
-  setToken(token) {
+  setToken(token: string): void {
     localStorage.setItem('authToken', token);
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   }
 
   // Get token from localStorage
-  getToken() {
+  getToken(): string | null {
     return localStorage.getItem('authToken');
   }
 
   // Clear token from localStorage and axios headers
-  clearToken() {
+  clearToken(): void {
     localStorage.removeItem('authToken');
     delete axios.defaults.headers.common['Authorization'];
   }
 
   // Check if user is authenticated
-  isAuthenticated() {
+  isAuthenticated(): boolean {
     const token = this.getToken();
     return !!token;
   }
 
   // Reset interceptors (useful for testing)
-  reset() {
+  reset(): void {
     axios.interceptors.request.clear();
     axios.interceptors.response.clear();
     this.isSetup = false;

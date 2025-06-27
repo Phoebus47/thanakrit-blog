@@ -12,11 +12,27 @@ import { FacebookIcon, LinkedinIcon, TwitterIcon } from "react-share";
 import { Textarea } from "@/components/ui/textarea";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useAuth } from "@contexts/authentication";
+import { useAuth } from "@/contexts/authentication";
+import { LoadingScreen } from "@/components/WebSection";
 import remarkGfm from "remark-gfm";
 import axios from "axios";
 
-export function ViewPost({ onLoadingChange }) {
+interface ViewPostProps {
+  onLoadingChange?: (loading: boolean) => void;
+}
+
+interface Comment {
+  id: string;
+  user_id: string;
+  comment_text: string;
+  created_at: string;
+  user?: {
+    name: string;
+    profile_pic?: string;
+  };
+}
+
+export function ViewPost({ onLoadingChange }: ViewPostProps) {
   const [img, setImg] = useState("");
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
@@ -24,7 +40,7 @@ export function ViewPost({ onLoadingChange }) {
   const [category, setCategory] = useState("");
   const [content, setContent] = useState("");
   const [likes, setLikes] = useState(0);
-  const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -119,10 +135,12 @@ export function ViewPost({ onLoadingChange }) {
                   ol: ({node, ...props}) => <ol className="list-decimal ml-6 mb-4" {...props} />,
                   li: ({node, ...props}) => <li className="mb-2" {...props} />,
                   blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-neon-orange pl-4 italic mb-4" {...props} />,
-                  code: ({node, inline, ...props}) => 
-                    inline ? 
+                  code: ({node, ...props}: any) => {
+                    const isInline = !props.className?.includes('language-');
+                    return isInline ? 
                       <code className="bg-slate-800 px-2 py-1 rounded text-neon-green" {...props} /> :
                       <code className="block bg-slate-800 p-4 rounded mb-4 text-neon-green overflow-x-auto" {...props} />
+                  }
                 }}
               >
                 {content ? content.replace(/\\n/g, '\n').replace(/\\"/g, '"') : "No content available"}
@@ -162,7 +180,14 @@ export function ViewPost({ onLoadingChange }) {
   );
 }
 
-function Share({ likesAmount, setDialogState, user, setLikes }) {
+interface ShareProps {
+  likesAmount: number;
+  setDialogState: (state: boolean) => void;
+  user: any;
+  setLikes: (likes: number) => void;
+}
+
+function Share({ likesAmount, setDialogState, user, setLikes }: ShareProps) {
   const param = useParams();
   const [isLiking, setIsLiking] = useState(false);
 
@@ -260,12 +285,19 @@ function Share({ likesAmount, setDialogState, user, setLikes }) {
   );
 }
 
-function Comment({ setDialogState, commentList, setComments, user }) {
+interface CommentProps {
+  setDialogState: (state: boolean) => void;
+  commentList: Comment[];
+  setComments: (comments: Comment[]) => void;
+  user: any;
+}
+
+function Comment({ setDialogState, commentList, setComments, user }: CommentProps) {
   const [newComment, setNewComment] = useState("");
   const [isError, setIsError] = useState(false);
   const param = useParams();
 
-  const handleSendComment = async (e) => {
+  const handleSendComment = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     if (!user) {
@@ -339,15 +371,15 @@ function Comment({ setDialogState, commentList, setComments, user }) {
             <div className="flex space-x-4">
               <div className="flex-shrink-0">
                 <img
-                  src={comment.users?.profile_pic || "/images/avartar.webp"}
-                  alt={comment.users?.name || "User"}
+                  src={comment.user?.profile_pic || "/images/avartar.webp"}
+                  alt={comment.user?.name || "User"}
                   className="rounded-full w-12 h-12 object-cover border-2 border-neon-blue shadow-[0_0_8px_#00fff7]"
                 />
               </div>
               <div className="flex-grow">
                 <div className="flex flex-col items-start justify-between">
                   <h4 className="font-semibold text-neon-blue txt-shadow-neon-blue">
-                    {comment.users?.name || "Unknown User"}
+                    {comment.user?.name || "Unknown User"}
                   </h4>
                   <span className="text-sm text-neon-yellow/80">
                     {new Date(comment.created_at)
@@ -411,7 +443,12 @@ function AuthorBio() {
   );
 }
 
-function CreateAccountModal({ dialogState, setDialogState }) {
+interface CreateAccountModalProps {
+  dialogState: boolean;
+  setDialogState: (state: boolean) => void;
+}
+
+function CreateAccountModal({ dialogState, setDialogState }: CreateAccountModalProps) {
   const navigate = useNavigate();
   return (
     <AlertDialog open={dialogState} onOpenChange={setDialogState}>
@@ -439,16 +476,5 @@ function CreateAccountModal({ dialogState, setDialogState }) {
         </AlertDialogCancel>
       </AlertDialogContent>
     </AlertDialog>
-  );
-}
-
-export function LoadingScreen() {
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="flex flex-col items-center space-y-4">
-        <Loader2 className="w-16 h-16 animate-spin text-neon-orange" />
-        <p className="text-lg font-semibold text-neon-yellow txt-shadow-neon-orange">Loading...</p>
-      </div>
-    </div>
   );
 }

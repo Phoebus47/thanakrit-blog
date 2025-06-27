@@ -15,14 +15,14 @@ function LoginPage() {
   const { login, state } = useAuth();
   const navigate = useNavigate(); // ใช้ useNavigate ใน component นี้
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const result = await login(formData);
@@ -100,7 +100,7 @@ function LoginPage() {
 
               <button
                 type="submit"
-                disabled={state.loading}
+                disabled={state.loading || false}
                 className="w-full py-3 cursor-pointer bg-gradient-to-r from-neon-blue to-neon-pink rounded-lg font-orbitron font-semibold text-white shadow-[0_0_16px_#00fff7] hover:shadow-[0_0_24px_#00fff7] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {state.loading ? (

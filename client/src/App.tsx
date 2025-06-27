@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./contexts/authentication";
+import { AuthProvider, useAuth } from "./contexts/authentication";
 import { Toaster } from "sonner";
 import HomePage from "./pages/HomePage";
 import ViewPostPage from "./pages/ViewPostPage";
@@ -10,8 +10,8 @@ import SignUpPage from "./pages/SignUpPage";
 import SignUpSuccessPage from "./pages/SignUpSuccessPage";
 import ProfilePage from "./pages/ProfilePage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
-import AuthenticationRoute from "./components/auth/AuthenticationRoute"; // แก้ไข path
-import ProtectedRoute from "./components/auth/ProtectedRoute"; // แก้ไข path
+import AuthenticationRoute from "./components/auth/AuthenticationRoute";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 import jwtInterceptors from "./utils/jwtInterceptors";
 
 function App() {
@@ -86,9 +86,12 @@ function App() {
 }
 
 // Wrapper components ที่ใช้ useAuth
-import { useAuth } from "./contexts/authentication";
 
-function AuthenticationRouteWrapper({ children }) {
+interface AuthenticationRouteWrapperProps {
+  children: React.ReactNode;
+}
+
+function AuthenticationRouteWrapper({ children }: AuthenticationRouteWrapperProps) {
   const { state, isAuthenticated } = useAuth();
 
   return (
@@ -101,7 +104,11 @@ function AuthenticationRouteWrapper({ children }) {
   );
 }
 
-function ProtectedRouteWrapper({ children }) {
+interface ProtectedRouteWrapperProps {
+  children: React.ReactNode;
+}
+
+function ProtectedRouteWrapper({ children }: ProtectedRouteWrapperProps) {
   const { state, isAuthenticated } = useAuth();
 
   return (

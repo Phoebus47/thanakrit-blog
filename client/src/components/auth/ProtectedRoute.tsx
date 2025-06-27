@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { Navigate } from "react-router-dom";
 import { LoadingScreen } from "../WebSection";
+import type { ProtectedRouteProps } from "../../types";
 
 function ProtectedRoute({
   isLoading,
@@ -8,7 +9,7 @@ function ProtectedRoute({
   userRole,
   requiredRole,
   children,
-}) {
+}: ProtectedRouteProps) {
   // แสดง loading ขณะตรวจสอบ authentication
   if (isLoading === null || isLoading) {
     return (

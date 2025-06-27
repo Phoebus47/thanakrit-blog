@@ -5,21 +5,35 @@ import { Loader2 } from "lucide-react";
 import { BackgroundLoader } from "../components/BackgroundLoader";
 import { NavBar, Footer } from "../components/WebSection";
 
+interface FormValues {
+  name: string;
+  username: string;
+  email: string;
+  password: string;
+}
+
+interface FormErrors {
+  name?: string;
+  username?: string;
+  email?: string;
+  password?: string;
+}
+
 export default function SignUpPage() {
   const { register, state } = useAuth();
   const navigate = useNavigate();
 
-  const [formValues, setFormValues] = useState({
+  const [formValues, setFormValues] = useState<FormValues>({
     name: "",
     username: "",
     email: "",
     password: "",
   });
-  const [formErrors, setFormErrors] = useState({});
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
 
-  const validateInputs = () => {
-    const errors = {};
+  const validateInputs = (): FormErrors => {
+    const errors: FormErrors = {};
 
     // Validate name
     if (!formValues.name.trim()) {
@@ -61,7 +75,7 @@ export default function SignUpPage() {
     return errors;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const errors = validateInputs();
     setFormErrors(errors);
@@ -79,12 +93,12 @@ export default function SignUpPage() {
     }
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormValues((prev) => ({ ...prev, [name]: value }));
     
     // Clear error when user starts typing
-    if (formErrors[name]) {
+    if (formErrors[name as keyof FormErrors]) {
       setFormErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
@@ -198,7 +212,7 @@ export default function SignUpPage() {
 
               <button
                 type="submit"
-                disabled={state.loading}
+                disabled={state.loading || false}
                 className="w-full py-3 cursor-pointer bg-gradient-to-r from-neon-blue to-neon-pink rounded-lg font-orbitron font-semibold text-white shadow-[0_0_16px_#00fff7] hover:shadow-[0_0_24px_#00fff7] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {state.loading ? (

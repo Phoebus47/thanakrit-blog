@@ -7,6 +7,155 @@ import { CategorySelector } from "./CategorySelector";
 import { debounce } from "lodash";
 import axios from "axios";
 
+interface SearchBarProps {
+  onSearch?: (value: string) => void;
+}
+
+export function SearchBar({ onSearch }: SearchBarProps) {
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [isFilled, setIsFilled] = useState(false);
+  const navigate = useNavigate();
+
+  // แก้ไข fetchSuggestions ให้ใช้ backend API
+  const fetchSuggestions = useCallback(
+    debounce(async (keyword: string) => {
+      if (keyword.length > 0) {
+        setIsLoading(true);
+        try {
+          const response = await axios.get(`/posts?keyword=${keyword}&limit=5`);
+          
+          const data = response.data;
+          setSuggestions(data.posts || []);
+        } catch (error) {
+          console.error("Error fetching suggestions:", error);
+          setSuggestions([]);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setSuggestions([]);
+      }
+    }, 500),
+    []
+  );
+
+  // Handle the search input change
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchKeyword(value);
+    fetchSuggestions(value); // Trigger debounced search
+    onSearch && onSearch(value); // Pass searchKeyword to parent if needed
+  };
+
+  // Handle keydown for arrow navigation and Enter key
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "ArrowDown") {
+      // Move down the list
+      setSelectedIndex((prevIndex) =>
+        prevIndex < suggestions.length - 1 ? prevIndex + 1 : prevIndex
+      );
+    } else if (e.key === "ArrowUp") {
+      // Move up the list
+      setSelectedIndex((prevIndex) =>
+        prevIndex > 0 ? prevIndex - 1 : prevIndex
+      );
+    } else if (e.key === "Enter") {
+      // If a suggestion is selected, fill the input with the selected suggestion
+      if (selectedIndex >= 0 && !isFilled) {
+        setSearchKeyword(suggestions[selectedIndex].title); // Fill input with selected suggestion
+        setIsFilled(true); // Mark as filled
+      } else {
+        // If already filled, navigate to the post or perform search
+        if (selectedIndex >= 0) {
+          navigate(`/post/${suggestions[selectedIndex].id}`);
+        } else {
+          navigate(`/search?query=${searchKeyword}`);
+        }
+      }
+    }
+  };
+
+  // Handle search button click
+  const handleSearchClick = () => {
+    if (selectedIndex >= 0) {
+      navigate(`/post/${suggestions[selectedIndex].id}`);
+    } else {
+      navigate(`/search?query=${searchKeyword}`);
+    }
+  };
+
+  // Handle dropdown item click
+  const handleDropdownItemClick = (suggestion: any) => {
+    setSearchKeyword(suggestion.title); // Autofill the input with the selected suggestion's title
+    setSelectedIndex(suggestions.indexOf(suggestion)); // Set the selected index
+    setShowDropdown(false); // Close the dropdown
+    setIsFilled(true); // Mark as filled when a suggestion is clicked
+  };
+
+  useEffect(() => {
+    // Clean up the debounced function on unmount
+    return () => {
+      fetchSuggestions.cancel();
+    };
+  }, [fetchSuggestions]);
+
+  return (
+    <div className="relative rounded-lg bg-neon-yellow/10 hover:bg-neon-yellow/20 border border-neon-orange shadow-neon-orange w-full flex items-center">
+      <Input
+        className="text-neon-orange pl-4 pr-12 py-2 w-full bg-transparent border border-neon-orange shadow-[0_0_12px_#ffe066] focus:outline-none focus:border-neon-yellow focus:shadow-[0_0_24px_#ffe066] rounded-lg font-orbitron placeholder:text-neon-yellow placeholder:font-semibold transition-all duration-300"
+        type="text"
+        name="search"
+        placeholder="Search…"
+        aria-label="search"
+        value={searchKeyword}
+        onChange={handleSearch}
+        onKeyDown={handleKeyDown}
+        onFocus={() => setShowDropdown(true)}
+        onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+          if (!e.relatedTarget || !(e.relatedTarget as HTMLElement).closest(".dropdown-item")) {
+            setShowDropdown(false);
+          }
+        }}
+      />
+      {showDropdown && (
+        <div className="absolute top-full left-0 right-0 mt-2 rounded-lg bg-gradient-to-br from-slate-900/90 via-yellow-900/30 to-yellow-100/0 border border-yellow-300/30 shadow-[0_0_24px_#ffe066] z-10">
+          {isLoading ? (
+            <p className="p-2 text-neon-yellow">Loading...</p>
+          ) : suggestions.length > 0 ? (
+            suggestions.map((suggestion, index) => (
+              <button
+                key={suggestion.id}
+                className={`dropdown-item w-full items-center p-2 text-neon-yellow font-semibold bg-transparent hover:bg-yellow-300/20 hover:text-neon-orange hover:rounded-lg cursor-pointer transition-all duration-200 ${
+                  selectedIndex === index
+                    ? "bg-yellow-300/20 text-neon-orange rounded-lg"
+                    : ""
+                }`}
+                onClick={() => handleDropdownItemClick(suggestion)}
+              >
+                {suggestion.title}
+              </button>
+            ))
+          ) : (
+            <p className="p-2 text-neon-yellow">No results found</p>
+          )}
+        </div>
+      )}
+      <button
+        className="absolute right-2 top-1/2 -translate-y-1/2 text-neon-yellow hover:text-neon-orange drop-shadow-[0_0_8px_#ffe066] transition-all duration-200"
+        aria-label="Search"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={handleSearchClick}
+      >
+        <SearchIcon />
+      </button>
+    </div>
+  );
+}
+
 // StyledTabs
 export function StyledTabs() {
   const [category, setCategory] = useState("Highlight");
@@ -173,149 +322,14 @@ export function CategoryDropDown() {
   );
 }
 
-export function SearchBar({ onSearch }) {
-  const [searchKeyword, setSearchKeyword] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(-1);
-  const [isFilled, setIsFilled] = useState(false);
-  const navigate = useNavigate();
-
-  // แก้ไข fetchSuggestions ให้ใช้ backend API
-  const fetchSuggestions = useCallback(
-    debounce(async (keyword) => {
-      if (keyword.length > 0) {
-        setIsLoading(true);
-        try {
-          const response = await axios.get(`/posts?keyword=${keyword}&limit=5`);
-          
-          const data = response.data;
-          setSuggestions(data.posts || []);
-        } catch (error) {
-          console.error("Error fetching suggestions:", error);
-          setSuggestions([]);
-        } finally {
-          setIsLoading(false);
-        }
-      } else {
-        setSuggestions([]);
-      }
-    }, 500),
-    []
-  );
-
-  // Handle the search input change
-  const handleSearch = (e) => {
-    const value = e.target.value;
-    setSearchKeyword(value);
-    fetchSuggestions(value); // Trigger debounced search
-    onSearch && onSearch(value); // Pass searchKeyword to parent if needed
-  };
-
-  // Handle keydown for arrow navigation and Enter key
-  const handleKeyDown = (e) => {
-    if (e.key === "ArrowDown") {
-      // Move down the list
-      setSelectedIndex((prevIndex) =>
-        prevIndex < suggestions.length - 1 ? prevIndex + 1 : prevIndex
-      );
-    } else if (e.key === "ArrowUp") {
-      // Move up the list
-      setSelectedIndex((prevIndex) =>
-        prevIndex > 0 ? prevIndex - 1 : prevIndex
-      );
-    } else if (e.key === "Enter") {
-      // If a suggestion is selected, fill the input with the selected suggestion
-      if (selectedIndex >= 0 && !isFilled) {
-        setSearchKeyword(suggestions[selectedIndex].title); // Fill input with selected suggestion
-        setIsFilled(true); // Mark as filled
-      } else {
-        // If already filled, navigate to the post or perform search
-        if (selectedIndex >= 0) {
-          navigate(`/post/${suggestions[selectedIndex].id}`);
-        } else {
-          navigate(`/search?query=${searchKeyword}`);
-        }
-      }
-    }
-  };
-
-  // Handle search button click
-  const handleSearchClick = () => {
-    if (selectedIndex >= 0) {
-      navigate(`/post/${suggestions[selectedIndex].id}`);
-    } else {
-      navigate(`/search?query=${searchKeyword}`);
-    }
-  };
-
-  // Handle dropdown item click
-  const handleDropdownItemClick = (suggestion) => {
-    setSearchKeyword(suggestion.title); // Autofill the input with the selected suggestion's title
-    setSelectedIndex(suggestions.indexOf(suggestion)); // Set the selected index
-    setShowDropdown(false); // Close the dropdown
-    setIsFilled(true); // Mark as filled when a suggestion is clicked
-  };
-
-  useEffect(() => {
-    // Clean up the debounced function on unmount
-    return () => {
-      fetchSuggestions.cancel();
-    };
-  }, [fetchSuggestions]);
-
-  return (
-    <div className="relative rounded-lg bg-neon-yellow/10 hover:bg-neon-yellow/20 border border-neon-orange shadow-neon-orange w-full flex items-center">
-      <Input
-        className="text-neon-orange pl-4 pr-12 py-2 w-full bg-transparent border border-neon-orange shadow-[0_0_12px_#ffe066] focus:outline-none focus:border-neon-yellow focus:shadow-[0_0_24px_#ffe066] rounded-lg font-orbitron placeholder:text-neon-yellow placeholder:font-semibold transition-all duration-300"
-        type="text"
-        name="search"
-        placeholder="Search…"
-        aria-label="search"
-        value={searchKeyword}
-        onChange={handleSearch}
-        onKeyDown={handleKeyDown} // Handle keydown for arrow keys and enter
-        onFocus={() => setShowDropdown(true)}
-        onBlur={(e) => {
-          if (!e.relatedTarget || !e.relatedTarget.closest(".dropdown-item")) {
-            setShowDropdown(false);
-          }
-        }}
-      />
-      {showDropdown && (
-        <div className="absolute top-full left-0 right-0 mt-2 rounded-lg bg-gradient-to-br from-slate-900/90 via-yellow-900/30 to-yellow-100/0 border border-yellow-300/30 shadow-[0_0_24px_#ffe066] z-10">
-          {isLoading ? (
-            <p className="p-2 text-neon-yellow">Loading...</p>
-          ) : suggestions.length > 0 ? (
-            suggestions.map((suggestion, index) => (
-              <button
-                key={suggestion.id}
-                className={`dropdown-item w-full items-center p-2 text-neon-yellow font-semibold bg-transparent hover:bg-yellow-300/20 hover:text-neon-orange hover:rounded-lg cursor-pointer transition-all duration-200 ${
-                  selectedIndex === index
-                    ? "bg-yellow-300/20 text-neon-orange rounded-lg"
-                    : ""
-                }`}
-                onClick={() => handleDropdownItemClick(suggestion)}
-              >
-                {suggestion.title}
-              </button>
-            ))
-          ) : (
-            <p className="p-2 text-neon-yellow">No results found</p>
-          )}
-        </div>
-      )}
-      <button
-        className="absolute right-2 top-1/2 -translate-y-1/2 text-neon-yellow hover:text-neon-orange drop-shadow-[0_0_8px_#ffe066] transition-all duration-200"
-        aria-label="Search"
-        onMouseDown={(e) => e.preventDefault()} // Prevent focus loss on button click
-        onClick={handleSearchClick} // Search or select suggestion
-      >
-        <SearchIcon />
-      </button>
-    </div>
-  );
+interface BlogCardProps {
+  postId: string;
+  image?: string;
+  category: string;
+  title: string;
+  description: string;
+  author?: any; // Can be refined later with proper User type
+  date: string;
 }
 
 export function BlogCard({
@@ -324,8 +338,9 @@ export function BlogCard({
   category,
   title,
   description,
+  author, // เพิ่ม author prop
   date,
-}) {
+}: BlogCardProps) {
   return (
     <div className="flex flex-col gap-4">
       {/* Dynamic Link */}
@@ -354,9 +369,9 @@ export function BlogCard({
           <img
             className="w-8 h-8 rounded-full object-cover mr-2"
             src="/images/avartar.webp" // Placeholder image for author
-            alt={"Thanakrit T." || "Unknown"}
+            alt={author?.name || "Unknown"}
           />
-          <span>{"Thanakrit T." || "Unknown Author"}</span>
+          <span>{author?.name || "Unknown Author"}</span>
           <span className="mx-2 text-white">|</span>
           <span>{date || "Unknown Date"}</span>
         </div>

@@ -8,19 +8,25 @@ import { useAuth } from "../contexts/authentication";
 import { toast } from "sonner";
 import { BackgroundLoader } from "../components/BackgroundLoader";
 import axios from "axios";
-import jwtInterceptors from "../utils/jwtInterceptors";
+
+interface ProfileData {
+  image: string;
+  name: string;
+  username: string;
+  email: string;
+}
 
 export default function ProfilePage() {
   const navigate = useNavigate();
   const { state, fetchUser, isAuthenticated } = useAuth();
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState<ProfileData>({
     image: "",
     name: "",
     username: "",
     email: "",
   });
   const [isSaving, setIsSaving] = useState(false);
-  const [imageFile, setImageFile] = useState(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -50,7 +56,7 @@ export default function ProfilePage() {
     fetchProfile();
   }, [state.user]);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProfile((prev) => ({
       ...prev,
@@ -58,8 +64,8 @@ export default function ProfilePage() {
     }));
   };
 
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
 
     if (!file) return;
 
@@ -102,7 +108,7 @@ export default function ProfilePage() {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       setIsSaving(true);
@@ -110,7 +116,7 @@ export default function ProfilePage() {
       let profilePicUrl = profile.image;
 
       // Upload image to backend API
-      if (imageFile) {
+      if (imageFile && state.user) {
         const formData = new FormData();
         formData.append('image', imageFile);
         formData.append('userId', state.user.id);
@@ -125,11 +131,13 @@ export default function ProfilePage() {
       }
 
       // Update user profile via backend API
-      const response = await axios.put(`/users/${state.user.id}`, {
-        name: profile.name,
-        username: profile.username,
-        profile_pic: profilePicUrl,
-      });
+      if (state.user) {
+        const response = await axios.put(`/users/${state.user.id}`, {
+          name: profile.name,
+          username: profile.username,
+          profile_pic: profilePicUrl,
+        });
+      }
 
       toast.custom((t) => (
         <div className="bg-green-500/20 border border-green-500/50 rounded-lg text-white p-4 flex justify-between items-start">
@@ -142,12 +150,13 @@ export default function ProfilePage() {
           </button>
         </div>
       ));
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       toast.custom((t) => (
         <div className="bg-red-500/20 border border-red-500/50 rounded-lg text-white p-4 flex justify-between items-start">
           <div>
             <h2 className="font-bold text-lg mb-1 font-orbitron">Error</h2>
-            <p className="text-sm font-orbitron">{error.message}</p>
+            <p className="text-sm font-orbitron">{errorMessage}</p>
           </div>
           <button onClick={() => toast.dismiss(t)} className="text-white hover:text-gray-200">
             <X size={20} />
@@ -269,6 +278,7 @@ export default function ProfilePage() {
                     Full Name
                   </label>
                   <Input
+                    type="text"
                     name="name"
                     value={profile.name}
                     onChange={handleInputChange}
@@ -282,6 +292,7 @@ export default function ProfilePage() {
                     Username
                   </label>
                   <Input
+                    type="text"
                     name="username"
                     value={profile.username}
                     onChange={handleInputChange}

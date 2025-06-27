@@ -1,13 +1,18 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
+import type { Post, PostsResponse, UseFetchPostsReturn } from "../types";
 
-export function useFetchPosts(category, page, searchQuery = "") {
-  const [posts, setPosts] = useState([]);
-  const [hasMore, setHasMore] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+export function useFetchPosts(
+  category: string, 
+  page: number, 
+  searchQuery: string = ""
+): UseFetchPostsReturn {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchPosts = useCallback(async () => {
+  const fetchPosts = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     setError(null);
 
@@ -18,7 +23,11 @@ export function useFetchPosts(category, page, searchQuery = "") {
       });
 
       if (category && category !== "Highlight") {
-        const categoryMap = { "Cat": "1", "Inspiration": "2", "General": "3" };
+        const categoryMap: Record<string, string> = { 
+          "Cat": "1", 
+          "Inspiration": "2", 
+          "General": "3" 
+        };
         if (categoryMap[category]) {
           params.append('category', categoryMap[category]);
         }
@@ -30,7 +39,7 @@ export function useFetchPosts(category, page, searchQuery = "") {
 
       const response = await axios.get(`/posts?${params}`);
       
-      const data = response.data;
+      const data: PostsResponse = response.data;
 
       setPosts((prevPosts) =>
         page === 1 ? data.posts : [...prevPosts, ...data.posts]
