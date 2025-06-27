@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { useAuth } from "../contexts/authentication";
 import { toast } from "sonner";
 import { BackgroundLoader } from "../components/BackgroundLoader";
+import axios from "axios";
+import jwtInterceptors from "../utils/jwtInterceptors";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -77,7 +79,7 @@ export default function ProfilePage() {
       return;
     }
 
-    const maxSize = 5 * 1024 * 1024;
+    const maxSize = 2 * 1024 * 1024;
     if (file.size > maxSize) {
       toast.custom((t) => (
         <div className="bg-red-500/20 border border-red-500/50 rounded-lg text-white p-4 flex justify-between items-start">
@@ -113,44 +115,21 @@ export default function ProfilePage() {
         formData.append('image', imageFile);
         formData.append('userId', state.user.id);
 
-        // เพิ่ม Authorization header
-        const token = localStorage.getItem('authToken');
-        const uploadResponse = await fetch(`${import.meta.env.VITE_SERVER_URL}/upload/profile`, {
-          method: 'POST',
+        const uploadResponse = await axios.post('/upload/profile', formData, {
           headers: {
-            'Authorization': `Bearer ${token}`, // เพิ่ม token
+            'Content-Type': 'multipart/form-data',
           },
-          body: formData,
         });
-
-        if (!uploadResponse.ok) {
-          const errorData = await uploadResponse.json();
-          throw new Error(errorData.message || 'Failed to upload image');
-        }
         
-        const uploadData = await uploadResponse.json();
-        profilePicUrl = uploadData.imageUrl;
+        profilePicUrl = uploadResponse.data.imageUrl;
       }
 
       // Update user profile via backend API
-      const token = localStorage.getItem('authToken');
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/users/${state.user.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`, // เพิ่ม token
-        },
-        body: JSON.stringify({
-          name: profile.name,
-          username: profile.username,
-          profile_pic: profilePicUrl,
-        }),
+      const response = await axios.put(`/users/${state.user.id}`, {
+        name: profile.name,
+        username: profile.username,
+        profile_pic: profilePicUrl,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update profile');
-      }
 
       toast.custom((t) => (
         <div className="bg-green-500/20 border border-green-500/50 rounded-lg text-white p-4 flex justify-between items-start">

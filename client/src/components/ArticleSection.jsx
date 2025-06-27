@@ -5,6 +5,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { useFetchPosts } from "@/hooks/useFetchPosts";
 import { CategorySelector } from "./CategorySelector";
 import { debounce } from "lodash";
+import axios from "axios";
 
 // StyledTabs
 export function StyledTabs() {
@@ -187,18 +188,9 @@ export function SearchBar({ onSearch }) {
       if (keyword.length > 0) {
         setIsLoading(true);
         try {
-          const response = await fetch(
-            `${import.meta.env.VITE_SERVER_URL}/posts?keyword=${keyword}&limit=5`,
-            {
-              headers: {
-                "Content-Type": "application/json",
-              },
-            }
-          );
-
-          if (!response.ok) throw new Error("Failed to fetch suggestions");
-
-          const data = await response.json();
+          const response = await axios.get(`/posts?keyword=${keyword}&limit=5`);
+          
+          const data = response.data;
           setSuggestions(data.posts || []);
         } catch (error) {
           console.error("Error fetching suggestions:", error);

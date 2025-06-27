@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import axios from "axios";
 
 export function useFetchPosts(category, page, searchQuery = "") {
   const [posts, setPosts] = useState([]);
@@ -27,11 +28,9 @@ export function useFetchPosts(category, page, searchQuery = "") {
         params.append('keyword', searchQuery);
       }
 
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/posts?${params}`);
+      const response = await axios.get(`/posts?${params}`);
       
-      if (!response.ok) throw new Error('Failed to fetch posts');
-      
-      const data = await response.json();
+      const data = response.data;
 
       setPosts((prevPosts) =>
         page === 1 ? data.posts : [...prevPosts, ...data.posts]

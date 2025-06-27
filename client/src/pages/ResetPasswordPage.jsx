@@ -7,6 +7,7 @@ import { User, Lock, X, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "../contexts/authentication";
 import { BackgroundLoader } from "../components/BackgroundLoader";
+import axios from "axios";
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
@@ -63,28 +64,12 @@ export default function ResetPasswordPage() {
     try {
       setIsLoading(true);
 
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/auth/reset-password`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          currentPassword: password,
-          newPassword: newPassword,
-        }),
+      const response = await axios.put('/auth/reset-password', {
+        currentPassword: password,
+        newPassword: newPassword,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to reset password');
-      }
+      const data = response.data;
 
       toast.custom((t) => (
         <div className="bg-green-500/20 border border-green-500/50 rounded-lg text-white p-4 flex justify-between items-start">
