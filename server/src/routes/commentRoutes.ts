@@ -1,12 +1,18 @@
-import { Router } from "express";
-import prisma from "../utils/prisma.mjs";
+import { Router, Request, Response } from "express";
+import prisma from "../utils/prisma.js";
+import { ApiResponse, CommentFormData, AsyncRouteHandler } from "../types/index.js";
 
 const commentRoutes = Router();
 
 // GET comments by post ID
-commentRoutes.get("/:postId", async (req, res) => {
+const getComments: AsyncRouteHandler<{ postId: string }> = async (req, res) => {
   try {
     const postId = Number(req.params.postId);
+
+    if (isNaN(postId)) {
+      res.status(400).json({ message: "Invalid post ID" });
+      return;
+    }
 
     const comments = await prisma.comments.findMany({
       where: { post_id: postId },
@@ -21,24 +27,27 @@ commentRoutes.get("/:postId", async (req, res) => {
       orderBy: { created_at: "desc" },
     });
 
-    return res.status(200).json(comments);
+    res.status(200).json(comments);
   } catch (error) {
     console.error("Error fetching comments:", error);
-    return res.status(500).json({
+    res.status(500).json({
       message: "Server could not fetch comments",
     });
   }
-});
+};
+
+commentRoutes.get("/:postId", getComments);
 
 // POST new comment
-commentRoutes.post("/", async (req, res) => {
+const createComment: AsyncRouteHandler<any, any, CommentFormData> = async (req, res) => {
   try {
     const { post_id, user_id, comment_text } = req.body;
 
     if (!post_id || !user_id || !comment_text) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "Missing required fields",
       });
+      return;
     }
 
     const comment = await prisma.comments.create({
@@ -57,13 +66,15 @@ commentRoutes.post("/", async (req, res) => {
       },
     });
 
-    return res.status(201).json(comment);
+    res.status(201).json(comment);
   } catch (error) {
     console.error("Error creating comment:", error);
-    return res.status(500).json({
+    res.status(500).json({
       message: "Server could not create comment",
     });
   }
-});
+};
+
+commentRoutes.post("/", createComment);
 
 export default commentRoutes;

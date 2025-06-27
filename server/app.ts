@@ -3,24 +3,24 @@ dotenv.config({
   path: process.env.NODE_ENV === "production" ? ".env.production" : ".env",
 });
 
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 
 // Import ALL routes ที่มีใน authentication.jsx
-import postRoutes from "./src/routes/postRoutes.mjs";
-import authRoutes from "./src/routes/authRoutes.mjs";
-import commentRoutes from "./src/routes/commentRoutes.mjs";
-import likeRoutes from "./src/routes/likeRoutes.mjs";
-import userRoutes from "./src/routes/userRoutes.mjs";
-import uploadRoutes from "./src/routes/uploadRoutes.mjs";
+import postRoutes from "./src/routes/postRoutes.js";
+import authRoutes from "./src/routes/authRoutes.js";
+import commentRoutes from "./src/routes/commentRoutes.js";
+import likeRoutes from "./src/routes/likeRoutes.js";
+import userRoutes from "./src/routes/userRoutes.js";
+import uploadRoutes from "./src/routes/uploadRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = process.env.PORT || 4000;
+const port: number = parseInt(process.env.PORT || "4000", 10);
 
 app.use(cors());
 app.use(express.json());
@@ -28,7 +28,7 @@ app.use(express.json());
 // Serve static files
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-app.get("/", (req, res) => {
+app.get("/", (req: Request, res: Response) => {
   res.json({
     message: "Hello TechUp!",
     status: "OK",
@@ -45,7 +45,7 @@ app.use("/users", userRoutes);
 app.use("/upload", uploadRoutes);
 
 // Handle 404 for API routes
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   res.status(404).json({
     message: "Route not found",
     path: req.path,
@@ -54,7 +54,7 @@ app.use((req, res, next) => {
 });
 
 // Error handling
-app.use((error, req, res, next) => {
+app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
   console.error("Server Error:", error);
   res.status(500).json({
     message: "Internal server error",

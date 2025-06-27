@@ -1,41 +1,58 @@
-import { Router } from "express";
-import prisma from "../utils/prisma.mjs";
+import { Router, Request, Response } from "express";
+import prisma from "../utils/prisma.js";
+import { ApiResponse, LikeFormData, AsyncRouteHandler } from "../types/index.js";
 
 const likeRoutes = Router();
 
 // GET likes count for a post
-likeRoutes.get("/:postId", async (req, res) => {
+const getLikesCount: AsyncRouteHandler<{ postId: string }> = async (req, res) => {
   try {
     const postId = Number(req.params.postId);
+
+    if (isNaN(postId)) {
+      res.status(400).json({ message: "Invalid post ID" });
+      return;
+    }
 
     const likesCount = await prisma.likes.count({
       where: { post_id: postId },
     });
 
-    return res.status(200).json({ count: likesCount });
+    res.status(200).json({ count: likesCount });
   } catch (error) {
     console.error("Error fetching likes count:", error);
-    return res.status(500).json({
+    res.status(500).json({
       message: "Server could not fetch likes count",
     });
   }
-});
+};
+
+likeRoutes.get("/:postId", getLikesCount);
 
 // POST/DELETE like (toggle)
-likeRoutes.post("/", async (req, res) => {
+const toggleLike: AsyncRouteHandler<any, any, LikeFormData> = async (req, res) => {
   try {
     const { post_id, user_id } = req.body;
 
     if (!post_id || !user_id) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "Missing required fields",
       });
+      return;
+    }
+
+    const postIdNum = Number(post_id);
+    if (isNaN(postIdNum)) {
+      res.status(400).json({
+        message: "Invalid post ID",
+      });
+      return;
     }
 
     // Check if like exists
     const existingLike = await prisma.likes.findFirst({
       where: {
-        post_id: Number(post_id),
+        post_id: postIdNum,
         user_id: user_id,
       },
     });
@@ -51,7 +68,7 @@ likeRoutes.post("/", async (req, res) => {
       // Like
       await prisma.likes.create({
         data: {
-          post_id: Number(post_id),
+          post_id: postIdNum,
           user_id: user_id,
         },
       });
@@ -59,19 +76,21 @@ likeRoutes.post("/", async (req, res) => {
 
     // Get updated count
     const likesCount = await prisma.likes.count({
-      where: { post_id: Number(post_id) },
+      where: { post_id: postIdNum },
     });
 
-    return res.status(200).json({
+    res.status(200).json({
       count: likesCount,
       action: existingLike ? "unliked" : "liked",
     });
   } catch (error) {
     console.error("Error toggling like:", error);
-    return res.status(500).json({
+    res.status(500).json({
       message: "Server could not toggle like",
     });
   }
-});
+};
+
+likeRoutes.post("/", toggleLike);
 
 export default likeRoutes;

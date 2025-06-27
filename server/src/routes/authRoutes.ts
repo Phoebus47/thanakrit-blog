@@ -1,19 +1,25 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import prisma from "../utils/prisma.mjs";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import prisma from "../utils/prisma.js";
+import { ApiResponse, CreateUserData, LoginData, User } from "../types/index.js";
 
 const authRoutes = Router();
 
+interface DecodedToken extends JwtPayload {
+  userId: string;
+}
+
 // Register
-authRoutes.post("/register", async (req, res) => {
+authRoutes.post("/register", async (req: Request, res: Response) => {
   try {
-    const { email, password, name, username } = req.body;
+    const { email, password, name, username }: CreateUserData = req.body;
 
     if (!email || !password || !name || !username) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "All fields are required",
       });
+      return;
     }
 
     // Check if user already exists
@@ -24,9 +30,10 @@ authRoutes.post("/register", async (req, res) => {
     });
 
     if (existingUser) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "User with this email or username already exists",
       });
+      return;
     }
 
     // Hash password
@@ -47,27 +54,28 @@ authRoutes.post("/register", async (req, res) => {
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
 
-    return res.status(201).json({
+    res.status(201).json({
       message: "User registered successfully",
       user: userWithoutPassword,
     });
   } catch (error) {
     console.error("Error registering user:", error);
-    return res.status(500).json({
+    res.status(500).json({
       message: "Server error during registration",
     });
   }
 });
 
 // Login
-authRoutes.post("/login", async (req, res) => {
+authRoutes.post("/login", async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { email, password }: LoginData = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "Email and password are required",
       });
+      return;
     }
 
     // Find user
@@ -76,18 +84,20 @@ authRoutes.post("/login", async (req, res) => {
     });
 
     if (!user) {
-      return res.status(401).json({
+      res.status(401).json({
         message: "Invalid credentials",
       });
+      return;
     }
 
     // Check password
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      return res.status(401).json({
+      res.status(401).json({
         message: "Invalid credentials",
       });
+      return;
     }
 
     // Generate JWT token
@@ -100,106 +110,104 @@ authRoutes.post("/login", async (req, res) => {
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
 
-    return res.status(200).json({
+    res.status(200).json({
       message: "Login successful",
       token,
       user: userWithoutPassword,
     });
   } catch (error) {
     console.error("Error logging in user:", error);
-    return res.status(500).json({
+    res.status(500).json({
       message: "Server error during login",
     });
   }
 });
 
-// Get current user (protected route) - เพิ่ม route นี้
-authRoutes.get("/get-user", async (req, res) => {
+// Get current user
+authRoutes.get("/get-user", async (req: Request, res: Response) => {
   try {
     const token = req.headers.authorization?.replace("Bearer ", "");
 
     if (!token) {
-      return res.status(401).json({
+      res.status(401).json({
         message: "No token provided",
       });
+      return;
     }
 
-    // Verify token
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET || "fallback-secret"
-    );
+    ) as DecodedToken;
 
-    // Get user
     const user = await prisma.users.findUnique({
       where: { id: decoded.userId },
     });
 
     if (!user) {
-      return res.status(401).json({
+      res.status(404).json({
         message: "User not found",
       });
+      return;
     }
 
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
 
-    return res.status(200).json(userWithoutPassword);
+    res.status(200).json({
+      message: "User found",
+      user: userWithoutPassword,
+    });
   } catch (error) {
-    console.error("Error getting current user:", error);
-    
-    if (error.name === "JsonWebTokenError") {
-      return res.status(401).json({
+    console.error("Error getting user:", error);
+
+    if (error instanceof jwt.JsonWebTokenError) {
+      res.status(401).json({
         message: "Invalid token",
       });
+      return;
     }
 
-    return res.status(500).json({
+    res.status(500).json({
       message: "Server error getting user",
-      error: error.message
     });
   }
 });
 
-// Reset password (protected route)
-authRoutes.put("/reset-password", async (req, res) => {
+// Reset password
+authRoutes.put("/reset-password", async (req: Request, res: Response) => {
   try {
+    const { currentPassword, newPassword }: { currentPassword: string; newPassword: string } = req.body;
     const token = req.headers.authorization?.replace("Bearer ", "");
-    const { currentPassword, newPassword } = req.body;
 
     if (!token) {
-      return res.status(401).json({
+      res.status(401).json({
         message: "No token provided",
       });
+      return;
     }
 
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "Current password and new password are required",
       });
+      return;
     }
 
-    if (newPassword.length < 8) {
-      return res.status(400).json({
-        message: "New password must be at least 8 characters long",
-      });
-    }
-
-    // Verify token
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET || "fallback-secret"
-    );
+    ) as DecodedToken;
 
-    // Get user
     const user = await prisma.users.findUnique({
       where: { id: decoded.userId },
     });
 
     if (!user) {
-      return res.status(401).json({
+      res.status(401).json({
         message: "User not found",
       });
+      return;
     }
 
     // Verify current password
@@ -209,9 +217,10 @@ authRoutes.put("/reset-password", async (req, res) => {
     );
 
     if (!isCurrentPasswordValid) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "Current password is incorrect",
       });
+      return;
     }
 
     // Hash new password
@@ -223,19 +232,20 @@ authRoutes.put("/reset-password", async (req, res) => {
       data: { password: hashedNewPassword },
     });
 
-    return res.status(200).json({
+    res.status(200).json({
       message: "Password updated successfully",
     });
   } catch (error) {
     console.error("Error resetting password:", error);
 
-    if (error.name === "JsonWebTokenError") {
-      return res.status(401).json({
+    if (error instanceof jwt.JsonWebTokenError) {
+      res.status(401).json({
         message: "Invalid token",
       });
+      return;
     }
 
-    return res.status(500).json({
+    res.status(500).json({
       message: "Server error during password reset",
     });
   }

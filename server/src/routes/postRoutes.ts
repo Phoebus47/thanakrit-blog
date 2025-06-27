@@ -1,11 +1,12 @@
-import { Router } from "express";
-import prisma from "../utils/prisma.mjs";
-import { validatePostInput } from "../middlewares/postValidation.mjs";
+import { Router, Request, Response } from "express";
+import prisma from "../utils/prisma.js";
+import { validatePostInput } from "../middlewares/postValidation.js";
+import { ApiResponse, PostFormData, AsyncRouteHandler } from "../types/index.js";
 
 const postRoutes = Router();
 
 // CREATE a new post
-postRoutes.post("/", validatePostInput, async (req, res) => {
+const createPost: AsyncRouteHandler<any, any, PostFormData> = async (req, res) => {
   try {
     const {
       title,
@@ -27,10 +28,11 @@ postRoutes.post("/", validatePostInput, async (req, res) => {
       !status_id ||
       !date
     ) {
-      return res.status(400).json({
+      res.status(400).json({
         message:
           "Server could not create post because there are missing data from client",
       });
+      return;
     }
 
     await prisma.posts.create({
@@ -41,37 +43,42 @@ postRoutes.post("/", validatePostInput, async (req, res) => {
         description,
         content,
         status_id,
-        date,
+        date: new Date(date),
         likes_count: likes_count || 0,
       },
     });
 
-    return res.status(201).json({ message: "Created post successfully" });
+    res.status(201).json({ message: "Created post successfully" });
   } catch (error) {
-    return res.status(500).json({
+    console.error("Error creating post:", error);
+    res.status(500).json({
       message: "Server could not create post because database connection",
     });
   }
-});
+};
+
+postRoutes.post("/", validatePostInput, createPost);
 
 // GET all posts with filtering and pagination
-postRoutes.get("/", async (req, res) => {
+const getAllPosts: AsyncRouteHandler = async (req, res) => {
   try {
-    const { page = 1, limit = 6, category, keyword } = req.query;
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-    const take = parseInt(limit);
+    const { page = "1", limit = "6", category, keyword } = req.query;
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+    const skip = (pageNum - 1) * limitNum;
+    const take = limitNum;
 
-    // สร้าง where condition
-    const where = {};
+    // Build where condition
+    const where: any = {};
 
     if (category && category !== "Highlight") {
-      where.category_id = parseInt(category);
+      where.category_id = parseInt(category as string);
     }
 
     if (keyword) {
       where.OR = [
-        { title: { contains: keyword, mode: "insensitive" } },
-        { description: { contains: keyword, mode: "insensitive" } },
+        { title: { contains: keyword as string, mode: "insensitive" } },
+        { description: { contains: keyword as string, mode: "insensitive" } },
       ];
     }
 
@@ -90,7 +97,7 @@ postRoutes.get("/", async (req, res) => {
     // Count total posts
     const totalPosts = await prisma.posts.count({ where });
     const totalPages = Math.ceil(totalPosts / take);
-    const hasMore = page < totalPages;
+    const hasMore = pageNum < totalPages;
 
     // Format response
     const formattedPosts = posts.map((post) => ({
@@ -105,10 +112,10 @@ postRoutes.get("/", async (req, res) => {
       likes_count: post.likes_count,
     }));
 
-    return res.status(200).json({
+    res.status(200).json({
       posts: formattedPosts,
       pagination: {
-        currentPage: parseInt(page),
+        currentPage: pageNum,
         totalPages,
         hasMore,
         totalPosts,
@@ -116,23 +123,32 @@ postRoutes.get("/", async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching posts:", error);
-    return res.status(500).json({
+    res.status(500).json({
       message: "Server could not read posts because database connection",
     });
   }
-});
+};
+
+postRoutes.get("/", getAllPosts);
 
 // GET single post by ID
-postRoutes.get("/:postId", async (req, res) => {
+const getPostById: AsyncRouteHandler<{ postId: string }> = async (req, res) => {
   try {
     const postId = Number(req.params.postId);
+    
+    if (isNaN(postId)) {
+      res.status(400).json({ message: "Invalid post ID" });
+      return;
+    }
+
     const post = await prisma.posts.findUnique({
       where: { id: postId },
       include: { categories: true },
     });
 
     if (!post) {
-      return res.status(404).json({ message: "Post not found" });
+      res.status(404).json({ message: "Post not found" });
+      return;
     }
 
     // Format response
@@ -148,19 +164,27 @@ postRoutes.get("/:postId", async (req, res) => {
       likes_count: post.likes_count,
     };
 
-    return res.status(200).json(formattedPost);
+    res.status(200).json(formattedPost);
   } catch (error) {
     console.error("Error fetching post:", error);
-    return res.status(500).json({
+    res.status(500).json({
       message: "Server could not read post because database connection",
     });
   }
-});
+};
+
+postRoutes.get("/:postId", getPostById);
 
 // UPDATE a post by ID
-postRoutes.put("/:postId", validatePostInput, async (req, res) => {
+const updatePost: AsyncRouteHandler<{ postId: string }, any, PostFormData> = async (req, res) => {
   try {
     const postId = Number(req.params.postId);
+    
+    if (isNaN(postId)) {
+      res.status(400).json({ message: "Invalid post ID" });
+      return;
+    }
+
     const {
       title,
       image,
@@ -174,9 +198,10 @@ postRoutes.put("/:postId", validatePostInput, async (req, res) => {
 
     const post = await prisma.posts.findUnique({ where: { id: postId } });
     if (!post) {
-      return res
+      res
         .status(404)
         .json({ message: "Server could not find a requested post to update" });
+      return;
     }
 
     await prisma.posts.update({
@@ -188,37 +213,50 @@ postRoutes.put("/:postId", validatePostInput, async (req, res) => {
         description,
         content,
         status_id,
-        date,
+        date: new Date(date),
         likes_count,
       },
     });
 
-    return res.status(200).json({ message: "Updated post sucessfully" });
+    res.status(200).json({ message: "Updated post successfully" });
   } catch (error) {
-    return res.status(500).json({
+    console.error("Error updating post:", error);
+    res.status(500).json({
       message: "Server could not update post because database connection",
     });
   }
-});
+};
+
+postRoutes.put("/:postId", validatePostInput, updatePost);
 
 // DELETE a post by ID
-postRoutes.delete("/:postId", async (req, res) => {
+const deletePost: AsyncRouteHandler<{ postId: string }> = async (req, res) => {
   try {
     const postId = Number(req.params.postId);
+    
+    if (isNaN(postId)) {
+      res.status(400).json({ message: "Invalid post ID" });
+      return;
+    }
+
     const post = await prisma.posts.findUnique({ where: { id: postId } });
     if (!post) {
-      return res
+      res
         .status(404)
         .json({ message: "Server could not find a requested post to delete" });
+      return;
     }
 
     await prisma.posts.delete({ where: { id: postId } });
-    return res.status(200).json({ message: "Deleted post sucessfully" });
+    res.status(200).json({ message: "Deleted post successfully" });
   } catch (error) {
-    return res.status(500).json({
+    console.error("Error deleting post:", error);
+    res.status(500).json({
       message: "Server could not delete post because database connection",
     });
   }
-});
+};
+
+postRoutes.delete("/:postId", deletePost);
 
 export default postRoutes;
