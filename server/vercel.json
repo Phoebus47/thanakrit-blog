@@ -1,14 +1,18 @@
 {
   "version": 2,
-  "functions": {
-    "app.ts": {
-      "runtime": "vercel-node@2.0.0"
+  "builds": [
+    {
+      "src": "app.ts",
+      "use": "@vercel/node",
+      "config": {
+        "runtime": "nodejs20.x"
+      }
     }
-  },
+  ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/app.ts"
+      "dest": "app.ts"
     }
   ]
 }
