@@ -1,5 +1,7 @@
 import fs from "fs";
-import fetch from "node-fetch"; // npm install node-fetch if not already installed
+
+// Use built-in fetch if available (Node.js 18+)
+const fetch = globalThis.fetch;
 
 const baseUrl =
   process.env.NODE_ENV === "development"
