@@ -20,8 +20,8 @@ export interface Post {
   image?: string;
   date: string;
   likes_count: number;
-  author_id: string;
-  author?: User;
+  user_id: string;
+  users?: User;
   created_at: string;
   updated_at: string;
 }
@@ -32,7 +32,7 @@ export interface Comment {
   post_id: string;
   user_id: string;
   comment_text: string;
-  user?: User;
+  users?: User;
   created_at: string;
   updated_at: string;
 }

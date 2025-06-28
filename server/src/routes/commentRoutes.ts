@@ -27,6 +27,7 @@ const getComments: AsyncRouteHandler<{ postId: string }> = async (req, res) => {
       orderBy: { created_at: "desc" },
     });
 
+    // ไม่ต้อง map users เป็น user แล้ว ให้ส่ง users ตรงๆ
     res.status(200).json(comments);
   } catch (error) {
     console.error("Error fetching comments:", error);
@@ -66,12 +67,14 @@ const createComment: AsyncRouteHandler<any, any, CommentFormData> = async (req, 
       },
     });
 
+    // ส่ง users ตรงๆ ไม่ต้อง map เป็น user
     res.status(201).json(comment);
   } catch (error) {
     console.error("Error creating comment:", error);
     res.status(500).json({
       message: "Server could not create comment",
     });
+    return;
   }
 };
 

@@ -34,7 +34,7 @@ export interface Post {
   description?: string;
   image?: string;
   category?: string;
-  author_id: string;
+  user_id: string;
   created_at: Date;
   updated_at: Date;
   likes_count?: number;
@@ -46,7 +46,7 @@ export interface CreatePostData {
   description?: string;
   image?: string;
   category?: string;
-  author_id: string;
+  user_id: string;
 }
 
 // Comment related types
@@ -122,6 +122,7 @@ export interface PostFormData {
   status_id: number;
   date: string;
   likes_count?: number;
+  user_id?: string;
 }
 
 export interface CommentFormData {

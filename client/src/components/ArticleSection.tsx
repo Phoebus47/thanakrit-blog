@@ -216,7 +216,7 @@ export function StyledTabs() {
                 image={blog.image}
                 category={blog.category}
                 description={blog.description}
-                author={blog.author}
+                users={blog.users}
                 date={new Date(blog.date).toLocaleDateString("en-GB", {
                   day: "numeric",
                   month: "long",
@@ -304,7 +304,7 @@ export function CategoryDropDown() {
                   image={blog.image}
                   category={blog.category}
                   description={blog.description}
-                  author={blog.author}
+                  users={blog.users}
                   date={new Date(blog.date).toLocaleDateString("en-GB", {
                     day: "numeric",
                     month: "long",
@@ -340,7 +340,7 @@ interface BlogCardProps {
   category: string;
   title: string;
   description: string;
-  author?: any; // Can be refined later with proper User type
+  users?: any; // Can be refined later with proper User type
   date: string;
 }
 
@@ -350,7 +350,7 @@ export function BlogCard({
   category,
   title,
   description,
-  author, // เพิ่ม author prop
+  users, // เปลี่ยนจาก user เป็น users
   date,
 }: BlogCardProps) {
   return (
@@ -380,10 +380,10 @@ export function BlogCard({
         <div className="flex items-center text-sm">
           <img
             className="w-8 h-8 rounded-full object-cover mr-2"
-            src="/images/avartar.webp" // Placeholder image for author
-            alt={author?.name || "Unknown"}
+            src={users?.profile_pic || "/images/avartar.webp"} // Use users profile pic
+            alt={users?.name || "Unknown"}
           />
-          <span>{author?.name || "Unknown Author"}</span>
+          <span>{users?.name || "Unknown Author"}</span>
           <span className="mx-2 text-white">|</span>
           <span>{date || "Unknown Date"}</span>
         </div>

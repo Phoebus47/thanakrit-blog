@@ -37,12 +37,9 @@ export function useFetchPosts(
         params.append('keyword', searchQuery);
       }
 
-      console.log("Making API request to:", `/posts?${params}`); // Debug log
       const response = await axios.get<Post[] | PostsResponse>(`/posts?${params}`);
       
       const data = response.data;
-      
-      console.log("API Response:", data); // Debug log
       
       // Handle different response structures and ensure type safety
       let newPosts: Post[] = [];
@@ -57,6 +54,13 @@ export function useFetchPosts(
         // Object response (PostsResponse type)
         const postData = data as PostsResponse;
         newPosts = postData.posts || postData.data || [];
+        
+        console.log("Individual posts data:", newPosts.map(post => ({
+          id: post.id,
+          title: post.title,
+          users: post.users,
+          user: (post as any).user
+        })));
         
         // Type-safe pagination check
         const pagination = postData.pagination;

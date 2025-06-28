@@ -26,7 +26,7 @@ interface Comment {
   user_id: string;
   comment_text: string;
   created_at: string;
-  user?: {
+  users?: {
     name: string;
     profile_pic?: string;
   };
@@ -73,6 +73,7 @@ export function ViewPost({ onLoadingChange }: ViewPostProps) {
 
       // Fetch comments from backend API (ต้องสร้าง API endpoint)
       const commentsResponse = await axios.get(`/comments/${param.postId}`);
+      console.log("Comments response:", commentsResponse.data);
       setComments(commentsResponse.data || []);
 
       setIsLoading(false);
@@ -319,6 +320,7 @@ function Comment({ setDialogState, commentList, setComments, user }: CommentProp
         comment_text: newComment
       });
 
+      console.log("New comment response:", response.data);
       setComments([response.data, ...commentList]);
       setNewComment("");
     } catch (error) {
@@ -371,15 +373,15 @@ function Comment({ setDialogState, commentList, setComments, user }: CommentProp
             <div className="flex space-x-4">
               <div className="flex-shrink-0">
                 <img
-                  src={comment.user?.profile_pic || "/images/avartar.webp"}
-                  alt={comment.user?.name || "User"}
+                  src={comment.users?.profile_pic || "/images/avartar.webp"}
+                  alt={comment.users?.name || "User"}
                   className="rounded-full w-12 h-12 object-cover border-2 border-neon-blue shadow-[0_0_8px_#00fff7]"
                 />
               </div>
               <div className="flex-grow">
                 <div className="flex flex-col items-start justify-between">
                   <h4 className="font-semibold text-neon-blue txt-shadow-neon-blue">
-                    {comment.user?.name || "Unknown User"}
+                    {comment.users?.name || "Unknown User"}
                   </h4>
                   <span className="text-sm text-neon-yellow/80">
                     {new Date(comment.created_at)

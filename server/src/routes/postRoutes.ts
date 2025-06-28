@@ -17,6 +17,7 @@ const createPost: AsyncRouteHandler<any, any, PostFormData> = async (req, res) =
       status_id,
       date,
       likes_count,
+      user_id,
     } = req.body;
 
     if (
@@ -26,7 +27,8 @@ const createPost: AsyncRouteHandler<any, any, PostFormData> = async (req, res) =
       !description ||
       !content ||
       !status_id ||
-      !date
+      !date ||
+      !user_id
     ) {
       res.status(400).json({
         message:
@@ -35,7 +37,7 @@ const createPost: AsyncRouteHandler<any, any, PostFormData> = async (req, res) =
       return;
     }
 
-    await prisma.posts.create({
+    await (prisma.posts as any).create({
       data: {
         title,
         image,
@@ -45,6 +47,7 @@ const createPost: AsyncRouteHandler<any, any, PostFormData> = async (req, res) =
         status_id,
         date: new Date(date),
         likes_count: likes_count || 0,
+        user_id,
       },
     });
 
@@ -94,23 +97,51 @@ const getAllPosts: AsyncRouteHandler = async (req, res) => {
       take,
     });
 
+    // Fetch users data separately for now
+    const userIds = posts.map(post => (post as any).user_id).filter(Boolean);
+    
+    // Convert userIds to strings to ensure correct type matching
+    const stringUserIds = userIds.map(id => String(id));
+    
+    const users = await prisma.users.findMany({
+      where: {
+        id: { in: stringUserIds }
+      },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        profile_pic: true,
+      },
+    });
+
+    // Create a map for quick user lookup - ensure both keys and lookups use strings
+    const userMap = new Map(users.map(user => [String(user.id), user]));
+
     // Count total posts
     const totalPosts = await prisma.posts.count({ where });
     const totalPages = Math.ceil(totalPosts / take);
     const hasMore = pageNum < totalPages;
 
     // Format response
-    const formattedPosts = posts.map((post) => ({
-      id: post.id,
-      image: post.image,
-      category: post.categories?.name,
-      title: post.title,
-      description: post.description,
-      content: post.content,
-      date: post.date,
-      status_id: post.status_id,
-      likes_count: post.likes_count,
-    }));
+    const formattedPosts = posts.map((post: any) => {
+      const postUserId = String(post.user_id || '');
+      const userData = postUserId ? userMap.get(postUserId) : null;
+      
+      return {
+        id: post.id,
+        image: post.image,
+        category: post.categories?.name,
+        title: post.title,
+        description: post.description,
+        content: post.content,
+        date: post.date,
+        status_id: post.status_id,
+        likes_count: post.likes_count,
+        user_id: post.user_id || null,
+        users: userData,
+      };
+    });
 
     res.status(200).json({
       posts: formattedPosts,
@@ -151,6 +182,20 @@ const getPostById: AsyncRouteHandler<{ postId: string }> = async (req, res) => {
       return;
     }
 
+    // Fetch user data if user_id exists
+    let user = null;
+    if ((post as any).user_id) {
+      user = await prisma.users.findUnique({
+        where: { id: String((post as any).user_id) },
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          profile_pic: true,
+        },
+      });
+    }
+
     // Format response
     const formattedPost = {
       id: post.id,
@@ -162,6 +207,8 @@ const getPostById: AsyncRouteHandler<{ postId: string }> = async (req, res) => {
       date: post.date,
       status_id: post.status_id,
       likes_count: post.likes_count,
+      user_id: (post as any).user_id || null,
+      users: user,
     };
 
     res.status(200).json(formattedPost);
@@ -194,6 +241,7 @@ const updatePost: AsyncRouteHandler<{ postId: string }, any, PostFormData> = asy
       status_id,
       date,
       likes_count,
+      user_id,
     } = req.body;
 
     const post = await prisma.posts.findUnique({ where: { id: postId } });
@@ -204,18 +252,25 @@ const updatePost: AsyncRouteHandler<{ postId: string }, any, PostFormData> = asy
       return;
     }
 
-    await prisma.posts.update({
+    const updateData: any = {
+      title,
+      image,
+      category_id,
+      description,
+      content,
+      status_id,
+      date: new Date(date),
+      likes_count,
+    };
+
+    // Add user_id if provided
+    if (user_id) {
+      updateData.user_id = user_id;
+    }
+
+    await (prisma.posts as any).update({
       where: { id: postId },
-      data: {
-        title,
-        image,
-        category_id,
-        description,
-        content,
-        status_id,
-        date: new Date(date),
-        likes_count,
-      },
+      data: updateData,
     });
 
     res.status(200).json({ message: "Updated post successfully" });
