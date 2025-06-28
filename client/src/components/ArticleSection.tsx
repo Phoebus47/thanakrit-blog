@@ -164,7 +164,8 @@ export function StyledTabs() {
 
   const { posts, hasMore, isLoading, error, fetchPosts } = useFetchPosts(
     category,
-    page
+    page,
+    "" // Add empty searchQuery parameter
   );
 
   const handleLoadMore = () => {
@@ -172,6 +173,11 @@ export function StyledTabs() {
       setPage((prevPage) => prevPage + 1);
     }
   };
+
+  // Reset page when category changes
+  useEffect(() => {
+    setPage(1);
+  }, [category]);
 
   useEffect(() => {
     fetchPosts();
@@ -193,18 +199,18 @@ export function StyledTabs() {
 
       <h2 className="text-lg font-bold mt-4">{`Blogs in ${category}`}</h2>
 
-      {isLoading && posts.length === 0 ? (
+      {isLoading && (!Array.isArray(posts) || posts.length === 0) ? (
         <p className="text-gray-500 mt-4">Loading...</p>
       ) : error ? (
         <p className="text-red-500 mt-4">
           Something went wrong. Please try again.
         </p>
-      ) : posts.length > 0 ? (
+      ) : Array.isArray(posts) && posts.length > 0 ? (
         <>
           <div className="grid grid-cols-2 gap-8 mt-4">
             {posts.map((blog, index) => (
               <BlogCard
-                key={`blog-${index}`}
+                key={`blog-${blog.id || index}`}
                 postId={blog.id}
                 title={blog.title}
                 image={blog.image}
@@ -247,7 +253,8 @@ export function CategoryDropDown() {
 
   const { posts, hasMore, isLoading, error, fetchPosts } = useFetchPosts(
     category,
-    page
+    page,
+    "" // Add empty searchQuery parameter
   );
 
   const handleLoadMore = () => {
@@ -255,6 +262,11 @@ export function CategoryDropDown() {
       setPage((prevPage) => prevPage + 1);
     }
   };
+
+  // Reset page when category changes
+  useEffect(() => {
+    setPage(1);
+  }, [category]);
 
   useEffect(() => {
     fetchPosts();
@@ -275,17 +287,17 @@ export function CategoryDropDown() {
       {/* รายการ Blog ที่กรองแล้ว */}
       <h2 className="text-lg font-bold mt-4">{`Blogs in ${category}`}</h2>
 
-      {isLoading && posts.length === 0 ? (
+      {isLoading && (!Array.isArray(posts) || posts.length === 0) ? (
         <p className="text-gray-500 mt-4">Loading...</p>
       ) : error ? (
         <p className="text-red-500 mt-4">
           Something went wrong. Please try again.
         </p>
-      ) : posts.length > 0 ? (
+      ) : Array.isArray(posts) && posts.length > 0 ? (
         <>
           <ul className="grid grid-cols-1 gap-4 mt-4">
             {posts.map((blog, index) => (
-              <li key={`blog-${index}`}>
+              <li key={`blog-${blog.id || index}`}>
                 <BlogCard
                   postId={blog.id}
                   title={blog.title}

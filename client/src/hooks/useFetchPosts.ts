@@ -37,18 +37,75 @@ export function useFetchPosts(
         params.append('keyword', searchQuery);
       }
 
-      const response = await axios.get(`/posts?${params}`);
+      console.log("Making API request to:", `/posts?${params}`); // Debug log
+      const response = await axios.get<Post[] | PostsResponse>(`/posts?${params}`);
       
-      const data: PostsResponse = response.data;
-
+      const data = response.data;
+      
+      console.log("API Response:", data); // Debug log
+      
+      // Handle different response structures and ensure type safety
+      let newPosts: Post[] = [];
+      let calculatedHasMore = false;
+      
+      if (Array.isArray(data)) {
+        // Direct array response
+        newPosts = data;
+        calculatedHasMore = data.length >= 6;
+        console.log("Array response detected, posts:", newPosts.length, "hasMore:", calculatedHasMore);
+      } else {
+        // Object response (PostsResponse type)
+        const postData = data as PostsResponse;
+        newPosts = postData.posts || postData.data || [];
+        
+        // Type-safe pagination check
+        const pagination = postData.pagination;
+        if (pagination && typeof pagination.hasMore === 'boolean') {
+          calculatedHasMore = pagination.hasMore;
+        } else if (typeof postData.hasMore === 'boolean') {
+          calculatedHasMore = postData.hasMore;
+        } else {
+          calculatedHasMore = newPosts.length >= 6;
+        }
+        console.log("Object response detected, posts:", newPosts.length, "hasMore:", calculatedHasMore);
+      }
+      
+      // Ensure newPosts is always an array
+      if (!Array.isArray(newPosts)) {
+        console.warn("newPosts is not an array, resetting to empty array:", newPosts);
+        newPosts = [];
+      }
+      
       setPosts((prevPosts) =>
-        page === 1 ? data.posts : [...prevPosts, ...data.posts]
+        page === 1 ? newPosts : [...prevPosts, ...newPosts]
       );
       
-      setHasMore(data.pagination.hasMore);
+      setHasMore(calculatedHasMore);
+      
+      console.log("Posts loaded:", newPosts.length, "HasMore:", calculatedHasMore); // Debug log
     } catch (error) {
       console.error("Error fetching posts:", error);
-      setError("Something went wrong. Please try again.");
+      
+      // More detailed error logging
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error details:", {
+          message: error.message,
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+          url: error.config?.url
+        });
+        
+        if (error.response?.status === 404) {
+          setError("Posts not found.");
+        } else if (error.response?.status && error.response.status >= 500) {
+          setError("Server error. Please try again later.");
+        } else {
+          setError(`Error: ${error.response?.statusText || error.message}`);
+        }
+      } else {
+        setError("Network error. Please check your connection.");
+      }
     } finally {
       setIsLoading(false);
     }
