@@ -86,8 +86,13 @@ export interface PaginationInfo {
 }
 
 export interface PostsResponse {
-  posts: Post[];
-  pagination: PaginationInfo;
+  posts?: Post[];
+  data?: Post[];
+  pagination?: PaginationInfo;
+  hasMore?: boolean;
+  total?: number;
+  page?: number;
+  limit?: number;
 }
 
 // Form Types
