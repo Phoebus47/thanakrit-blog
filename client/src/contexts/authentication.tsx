@@ -34,13 +34,14 @@ function AuthProvider({ children }: AuthProviderProps) {
     user: null,
   });
 
-  // Set unauthorized callback
+  // Set unauthorized callback and ensure JWT interceptors are properly setup
   useEffect(() => {
     const handleUnauthorized = () => {
       setState({ user: null, error: null, loading: null, getUserLoading: null });
     };
     
-    jwtInterceptors.setUnauthorizedCallback(handleUnauthorized);
+    // Setup the interceptors if not already done
+    jwtInterceptors.setup(handleUnauthorized);
   }, []);
 
   // Login user
@@ -100,7 +101,7 @@ function AuthProvider({ children }: AuthProviderProps) {
       setState((prevState) => ({ ...prevState, getUserLoading: true }));
       
       const response = await axios.get('/auth/get-user');
-      const userData: User = response.data;
+      const userData: User = response.data.user; // Access the user property from the response
       
       setState((prevState) => ({
         ...prevState,
@@ -110,13 +111,25 @@ function AuthProvider({ children }: AuthProviderProps) {
       }));
     } catch (error: any) {
       console.error('Fetch user error:', error);
-      setState((prevState) => ({
-        ...prevState,
-        error: null,
-        user: null,
-        getUserLoading: false,
-      }));
-      jwtInterceptors.clearToken();
+      console.error('Error response:', error.response?.data);
+      
+      // Check if it's a 401 error (unauthorized)
+      if (error.response?.status === 401) {
+        // Token is invalid, clear it and reset user state
+        // Note: The interceptor already handles clearing the token
+        setState((prevState) => ({
+          ...prevState,
+          error: null,
+          user: null,
+          getUserLoading: false,
+        }));
+      } else {
+        // For other errors, keep the current user state but stop loading
+        setState((prevState) => ({
+          ...prevState,
+          getUserLoading: false,
+        }));
+      }
     }
   };
 
