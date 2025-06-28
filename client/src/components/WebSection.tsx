@@ -51,7 +51,7 @@ export const NavBar = () => {
             }}
             onClick={() => navigate("/")}
           >
-            CodeSpace .
+            Thanakrit Blog .
           </h1>
         </div>
         {/* Hamburger */}
@@ -165,7 +165,7 @@ export const NavBar = () => {
             }}
             onClick={() => navigate("/")}
           >
-            CodeSpace .
+            Thanakrit Blog .
           </h1>
         </div>
 
